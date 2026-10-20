@@ -1,0 +1,1670 @@
+{
+  "products": [
+    {
+      "id": "prod-1792484893303-da41ca",
+      "name": "Glow Facial Vitamin C Serum (20% OFF Special)",
+      "sku": "CRM-HAI-2369",
+      "description": "Brightening facial serum with 20% promotional discount.",
+      "price": 25000,
+      "discountPercent": 30,
+      "discountPrice": 17500,
+      "category": "hair-beauty",
+      "stock": 40,
+      "imageUrl": "/src/assets/images/product_street_sneakers_1791966366958.jpg",
+      "images": [
+        "/src/assets/images/product_street_sneakers_1791966366958.jpg"
+      ],
+      "shopName": "ContactReach Media Ltd",
+      "receiverName": "Ruth",
+      "paymentMethods": [
+        "MTN Mobile Money",
+        "MTN Merchant Code",
+        "Airtel Money"
+      ],
+      "merchantCode": "078002",
+      "receiverPhone": "078002260",
+      "location": "Kigali, Rwanda",
+      "deliveryInfo": "Same-day Kigali express (2-4 hrs)",
+      "status": "Available",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "isBestSeller": false,
+      "unit": "Piece",
+      "rating": 5,
+      "reviewsCount": 0,
+      "createdAt": "2026-10-20T08:28:13.303Z",
+      "history": [
+        {
+          "timestamp": "2026-10-20T08:28:13.303Z",
+          "action": "Created",
+          "user": "Ruth (System Owner)"
+        },
+        {
+          "timestamp": "2026-10-20T08:28:13.308Z",
+          "action": "Updated details",
+          "user": "Ruth (System Owner)"
+        }
+      ],
+      "updatedAt": "2026-10-20T08:28:13.308Z"
+    },
+    {
+      "id": "prod-1792484893228-7c1563",
+      "name": "Wireless Studio Bluetooth Headphones",
+      "sku": "CRM-ELE-6687",
+      "description": "Crystal clear studio sound with deep bass and noise cancellation.",
+      "price": 35000,
+      "category": "electronics",
+      "stock": 14,
+      "imageUrl": "/src/assets/images/product_street_sneakers_1791966366958.jpg",
+      "images": [
+        "/src/assets/images/product_street_sneakers_1791966366958.jpg"
+      ],
+      "shopName": "Kigali Quality Audio Ltd",
+      "receiverName": "Ruth",
+      "paymentMethods": [
+        "MTN Mobile Money",
+        "MTN Merchant Code",
+        "Airtel Money"
+      ],
+      "merchantCode": "078002",
+      "receiverPhone": "078002260",
+      "location": "Kigali, Rwanda",
+      "deliveryInfo": "Same-day Kigali express (2-4 hrs)",
+      "status": "Available",
+      "isFeatured": false,
+      "isNewArrival": false,
+      "isBestSeller": false,
+      "unit": "Piece",
+      "rating": 5,
+      "reviewsCount": 0,
+      "createdAt": "2026-10-20T08:28:13.228Z",
+      "history": [
+        {
+          "timestamp": "2026-10-20T08:28:13.228Z",
+          "action": "Created",
+          "user": "Ruth (System Owner)"
+        }
+      ]
+    },
+    {
+      "name": "shoes",
+      "sku": "CRM-HAI-1824",
+      "description": "test",
+      "price": 30000,
+      "category": "fashion",
+      "stock": 25,
+      "imageUrl": "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/a/d/ad22b92Nike-553558-300_7.jpg?rnd=20200526195200&tr=w-1536",
+      "images": [
+        "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/a/d/ad22b92Nike-553558-300_7.jpg?rnd=20200526195200&tr=w-1536"
+      ],
+      "shopName": "Sky Beauty",
+      "brand": "nike",
+      "unit": "Piece",
+      "status": "Available",
+      "isFeatured": false,
+      "isNewArrival": true,
+      "isBestSeller": false,
+      "variations": [
+        {
+          "name": "Size",
+          "options": [
+            "21",
+            "22"
+          ]
+        },
+        {
+          "name": "Color",
+          "options": [
+            "white  blue"
+          ]
+        }
+      ],
+      "id": "prod-1792401398473-jvgk"
+    }
+  ],
+  "categories": [
+    {
+      "id": "cat-1792402161414",
+      "nameEn": "shoes",
+      "nameRw": "inkweto",
+      "icon": "Tag",
+      "itemCount": 0,
+      "description": "down",
+      "subcategories": [],
+      "isActive": true
+    },
+    {
+      "nameEn": "clothes",
+      "nameRw": "imyenda",
+      "icon": "Tag",
+      "description": "down",
+      "id": "cat-1792402162773"
+    },
+    {
+      "id": "hair-beauty",
+      "nameEn": "Beauty & Cosmetics",
+      "nameRw": "Ubwiza",
+      "icon": "Sparkles",
+      "itemCount": 0,
+      "description": "Salon supplies, cosmetics, hair care, and personal wellness."
+    },
+    {
+      "id": "electronics",
+      "nameEn": "Electronics & TV",
+      "nameRw": "Ibyuma",
+      "icon": "Tv",
+      "itemCount": 0,
+      "description": "Smartphones, TV accessories, audio devices, and gadgets."
+    },
+    {
+      "id": "fashion",
+      "nameEn": "Fashion & Apparel",
+      "nameRw": "Imyenda",
+      "icon": "Shirt",
+      "itemCount": 0,
+      "description": "Clothing, shoes, bags, and modern Rwandan & international styles."
+    },
+    {
+      "id": "amatara",
+      "nameEn": "Lighting & Gadgets",
+      "nameRw": "Amatara",
+      "icon": "Lightbulb",
+      "itemCount": 0,
+      "description": "Home lighting, LED strips, rechargeable lamps, and decor."
+    },
+    {
+      "id": "impano",
+      "nameEn": "Gifts & Home Decor",
+      "nameRw": "Impano",
+      "icon": "Gift",
+      "itemCount": 0,
+      "description": "Curated gift hampers, decorative accents, and special packages."
+    },
+    {
+      "id": "abana",
+      "nameEn": "Kids & Toys",
+      "nameRw": "Abana",
+      "icon": "Baby",
+      "itemCount": 0,
+      "description": "Educational toys, kids essentials, clothing, and baby care."
+    },
+    {
+      "id": "amasaha",
+      "nameEn": "Watches & Jewelry",
+      "nameRw": "Amasaha",
+      "icon": "Watch",
+      "itemCount": 0,
+      "description": "Wristwatches, necklaces, bracelets, and fashion accessories."
+    },
+    {
+      "id": "ibikapu",
+      "nameEn": "Bags & Luggage",
+      "nameRw": "Ibikapu",
+      "icon": "Briefcase",
+      "itemCount": 0,
+      "description": "Backpacks, handbags, travel luggage, and laptop cases."
+    },
+    {
+      "id": "sports",
+      "nameEn": "Sports & Fitness",
+      "nameRw": "Imikino",
+      "icon": "Dumbbell",
+      "itemCount": 0,
+      "description": "Workout accessories, activewear, and fitness gear."
+    },
+    {
+      "id": "books",
+      "nameEn": "Books & Learning",
+      "nameRw": "Books",
+      "icon": "BookOpen",
+      "itemCount": 0,
+      "description": "School materials, stationery, books, and business planners."
+    }
+  ],
+  "shops": [
+    {
+      "id": "shop-1792404386506",
+      "name": "contactreach",
+      "category": "all",
+      "description": "",
+      "location": "Kigali, Rwanda",
+      "address": "Fair View Plaza, Kigali",
+      "phone": "0780022600",
+      "email": "contactreachmedialimited@gmail.com",
+      "deliveryInfo": "Express same-day Kigali delivery",
+      "logo": "ShoppingBag",
+      "bannerColor": "from-orange-500 to-amber-600",
+      "isActive": true,
+      "isVerified": true,
+      "followersCount": 0,
+      "createdAt": "2026-10-19T10:06:26.506Z"
+    },
+    {
+      "id": "shop-kigali-quality-audio-ltd-3222",
+      "name": "Kigali Quality Audio Ltd",
+      "category": "electronics",
+      "description": "Authorized importer of sound systems and smart audio accessories.",
+      "location": "Downtown Kigali, Quartier Commercial",
+      "phone": "0788990011",
+      "email": "jeanpaul@qualityaudio.rw",
+      "logo": "Store",
+      "bannerColor": "from-orange-500 to-amber-600",
+      "isVerified": true,
+      "followersCount": 5,
+      "deliveryInfo": "Kigali express dispatch available",
+      "isActive": true,
+      "createdAt": "2026-10-20T08:28:13.222Z"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord-1792484893235-cfdb1e",
+      "orderNumber": "CRM-13634",
+      "trackingToken": "a87f194dfb46fdbb8405cefbc15e60c3",
+      "createdAt": "2026-10-20T08:28:13.235Z",
+      "customerName": "Aline Mugabo",
+      "customerPhone": "0788123456",
+      "deliveryType": "delivery",
+      "deliveryLocation": "Gasabo (Kimironko)",
+      "deliveryAddress": "KG 15 Ave, Kimironko",
+      "items": [
+        {
+          "productId": "prod-1792484893228-7c1563",
+          "productName": "Wireless Studio Bluetooth Headphones",
+          "price": 35000,
+          "quantity": 1,
+          "imageUrl": "/src/assets/images/product_street_sneakers_1791966366958.jpg",
+          "sku": "CRM-ELE-6687"
+        }
+      ],
+      "subtotal": 35000,
+      "deliveryFee": 1500,
+      "totalAmount": 36500,
+      "commissionRate": 10,
+      "commissionEarned": 3500,
+      "supplierPayoutAmount": 31500,
+      "supplierPayoutStatus": "Pending",
+      "supplierFulfillmentStatus": "Pending",
+      "paymentMethod": "MTN Mobile Money",
+      "receiverName": "Ruth",
+      "receiverDetails": "078002260",
+      "shopName": "Kigali Quality Audio Ltd",
+      "paymentStatus": "Paid",
+      "status": "Confirmed",
+      "stockDeducted": true,
+      "statusHistory": [
+        {
+          "status": "New",
+          "paymentStatus": "Pending Payment",
+          "timestamp": "2026-10-20T08:28:13.235Z",
+          "note": "Order successfully created. Awaiting mobile money payment initiation."
+        },
+        {
+          "status": "New",
+          "paymentStatus": "Pending Verification",
+          "timestamp": "2026-10-20T08:28:13.256Z",
+          "note": "Payment confirmation submitted. Txn ID: TXN1792484893253, Phone: 0788123456. Pending verification."
+        },
+        {
+          "status": "Confirmed",
+          "paymentStatus": "Paid",
+          "timestamp": "2026-10-20T08:28:13.260Z",
+          "note": "Payment verified & approved by Ruth (System Owner): 36,500 FRW (TXN1792484893253).",
+          "updatedBy": "Ruth (System Owner)"
+        }
+      ],
+      "paymentConfirmation": {
+        "id": "conf-1792484893255-49bc03",
+        "orderId": "ord-1792484893235-cfdb1e",
+        "orderNumber": "CRM-13634",
+        "customerName": "Aline Mugabo",
+        "paymentPhone": "0788123456",
+        "paymentMethod": "MTN Mobile Money",
+        "amountPaid": 36500,
+        "transactionId": "TXN1792484893253",
+        "submittedAt": "2026-10-20T08:28:13.256Z",
+        "verificationStatus": "Approved",
+        "verifiedAt": "2026-10-20T08:28:13.260Z",
+        "verifiedBy": "Ruth (System Owner)",
+        "adminNotes": "Verified via MTN MoMo statement."
+      }
+    },
+    {
+      "id": "ord-1792484463935-c6c735",
+      "orderNumber": "CRM-78945",
+      "trackingToken": "2b92d5cf6e9e5142e653166e9b684676",
+      "createdAt": "2026-10-20T08:21:03.935Z",
+      "customerName": "Aline Mugabo",
+      "customerPhone": "0788123456",
+      "deliveryType": "delivery",
+      "deliveryLocation": "Gasabo (Kimironko)",
+      "deliveryAddress": "KG 15 Ave, Kimironko",
+      "items": [
+        {
+          "productId": "prod-1792484463929-bc6f9e",
+          "productName": "Wireless Studio Bluetooth Headphones",
+          "price": 35000,
+          "quantity": 1,
+          "imageUrl": "/src/assets/images/product_street_sneakers_1791966366958.jpg",
+          "sku": "CRM-ELE-7805"
+        }
+      ],
+      "subtotal": 35000,
+      "deliveryFee": 1500,
+      "totalAmount": 36500,
+      "commissionRate": 10,
+      "commissionEarned": 3500,
+      "supplierPayoutAmount": 31500,
+      "supplierPayoutStatus": "Pending",
+      "supplierFulfillmentStatus": "Pending",
+      "paymentMethod": "MTN Mobile Money",
+      "receiverName": "Ruth",
+      "receiverDetails": "078002260",
+      "shopName": "Kigali Quality Audio Ltd",
+      "paymentStatus": "Paid",
+      "status": "Confirmed",
+      "stockDeducted": true,
+      "statusHistory": [
+        {
+          "status": "New",
+          "paymentStatus": "Pending Payment",
+          "timestamp": "2026-10-20T08:21:03.935Z",
+          "note": "Order successfully created. Awaiting mobile money payment initiation."
+        },
+        {
+          "status": "New",
+          "paymentStatus": "Pending Verification",
+          "timestamp": "2026-10-20T08:21:03.950Z",
+          "note": "Payment confirmation submitted. Txn ID: TXN1792484463949, Phone: 0788123456. Pending verification."
+        },
+        {
+          "status": "Confirmed",
+          "paymentStatus": "Paid",
+          "timestamp": "2026-10-20T08:21:03.955Z",
+          "note": "Payment verified & approved by Ruth (System Owner): 36,500 FRW (TXN1792484463949).",
+          "updatedBy": "Ruth (System Owner)"
+        }
+      ],
+      "paymentConfirmation": {
+        "id": "conf-1792484463950-a5d7d6",
+        "orderId": "ord-1792484463935-c6c735",
+        "orderNumber": "CRM-78945",
+        "customerName": "Aline Mugabo",
+        "paymentPhone": "0788123456",
+        "paymentMethod": "MTN Mobile Money",
+        "amountPaid": 36500,
+        "transactionId": "TXN1792484463949",
+        "submittedAt": "2026-10-20T08:21:03.950Z",
+        "verificationStatus": "Approved",
+        "verifiedAt": "2026-10-20T08:21:03.954Z",
+        "verifiedBy": "Ruth (System Owner)",
+        "adminNotes": "Verified via MTN MoMo statement."
+      }
+    },
+    {
+      "id": "ord-1792399295743-98e166",
+      "orderNumber": "CRM-35715",
+      "trackingToken": "17b8a2ec0238cfd36fc8261147593193",
+      "createdAt": "2026-10-19T08:41:35.743Z",
+      "customerName": "Aline Mugabo",
+      "customerPhone": "0788123456",
+      "deliveryType": "delivery",
+      "deliveryLocation": "Gasabo (Kimironko)",
+      "deliveryAddress": "KG 15 Ave, Kimironko",
+      "items": [
+        {
+          "productId": "prod-1792399295737-588d60",
+          "productName": "Wireless Studio Bluetooth Headphones",
+          "price": 35000,
+          "quantity": 1,
+          "imageUrl": "/src/assets/images/product_street_sneakers_1791966366958.jpg",
+          "sku": "CRM-ELE-1364"
+        }
+      ],
+      "subtotal": 35000,
+      "deliveryFee": 1500,
+      "totalAmount": 36500,
+      "commissionRate": 10,
+      "commissionEarned": 3500,
+      "supplierPayoutAmount": 31500,
+      "supplierPayoutStatus": "Pending",
+      "supplierFulfillmentStatus": "Pending",
+      "paymentMethod": "MTN Mobile Money",
+      "receiverName": "Ruth",
+      "receiverDetails": "078002260",
+      "shopName": "Kigali Quality Audio Ltd",
+      "paymentStatus": "Paid",
+      "status": "Confirmed",
+      "stockDeducted": true,
+      "statusHistory": [
+        {
+          "status": "New",
+          "paymentStatus": "Pending Payment",
+          "timestamp": "2026-10-19T08:41:35.743Z",
+          "note": "Order successfully created. Awaiting mobile money payment initiation."
+        },
+        {
+          "status": "New",
+          "paymentStatus": "Pending Verification",
+          "timestamp": "2026-10-19T08:41:35.752Z",
+          "note": "Payment confirmation submitted. Txn ID: TXN1792399295750, Phone: 0788123456. Pending verification."
+        },
+        {
+          "status": "Confirmed",
+          "paymentStatus": "Paid",
+          "timestamp": "2026-10-19T08:41:35.756Z",
+          "note": "Payment verified & approved by Ruth (System Owner): 36,500 FRW (TXN1792399295750).",
+          "updatedBy": "Ruth (System Owner)"
+        }
+      ],
+      "paymentConfirmation": {
+        "id": "conf-1792399295752-2c03bd",
+        "orderId": "ord-1792399295743-98e166",
+        "orderNumber": "CRM-35715",
+        "customerName": "Aline Mugabo",
+        "paymentPhone": "0788123456",
+        "paymentMethod": "MTN Mobile Money",
+        "amountPaid": 36500,
+        "transactionId": "TXN1792399295750",
+        "submittedAt": "2026-10-19T08:41:35.752Z",
+        "verificationStatus": "Approved",
+        "verifiedAt": "2026-10-19T08:41:35.756Z",
+        "verifiedBy": "Ruth (System Owner)",
+        "adminNotes": "Verified via MTN MoMo statement."
+      }
+    },
+    {
+      "id": "ord-1792398749860-bca52a",
+      "orderNumber": "CRM-22969",
+      "trackingToken": "13f0345106bd3ac4d72d205149711dd1",
+      "createdAt": "2026-10-19T08:32:29.860Z",
+      "customerName": "Aline Mugabo",
+      "customerPhone": "0788123456",
+      "deliveryType": "delivery",
+      "deliveryLocation": "Gasabo (Kimironko)",
+      "deliveryAddress": "KG 15 Ave, Kimironko",
+      "items": [
+        {
+          "productId": "prod-1792398749855-15b0a7",
+          "productName": "Wireless Studio Bluetooth Headphones",
+          "price": 35000,
+          "quantity": 1,
+          "imageUrl": "/src/assets/images/product_street_sneakers_1791966366958.jpg",
+          "sku": "CRM-ELE-8119"
+        }
+      ],
+      "subtotal": 35000,
+      "deliveryFee": 1500,
+      "totalAmount": 36500,
+      "commissionRate": 10,
+      "commissionEarned": 3500,
+      "supplierPayoutAmount": 31500,
+      "supplierPayoutStatus": "Pending",
+      "supplierFulfillmentStatus": "Pending",
+      "paymentMethod": "MTN Mobile Money",
+      "receiverName": "Ruth",
+      "receiverDetails": "078002260",
+      "shopName": "Kigali Quality Audio Ltd",
+      "paymentStatus": "Paid",
+      "status": "Confirmed",
+      "stockDeducted": true,
+      "statusHistory": [
+        {
+          "status": "New",
+          "paymentStatus": "Pending Payment",
+          "timestamp": "2026-10-19T08:32:29.860Z",
+          "note": "Order successfully created. Awaiting mobile money payment initiation."
+        },
+        {
+          "status": "New",
+          "paymentStatus": "Pending Verification",
+          "timestamp": "2026-10-19T08:32:29.872Z",
+          "note": "Payment confirmation submitted. Txn ID: TXN1792398749870, Phone: 0788123456. Pending verification."
+        },
+        {
+          "status": "Confirmed",
+          "paymentStatus": "Paid",
+          "timestamp": "2026-10-19T08:32:29.875Z",
+          "note": "Payment verified & approved by Ruth (System Owner): 36,500 FRW (TXN1792398749870).",
+          "updatedBy": "Ruth (System Owner)"
+        }
+      ],
+      "paymentConfirmation": {
+        "id": "conf-1792398749872-f978e3",
+        "orderId": "ord-1792398749860-bca52a",
+        "orderNumber": "CRM-22969",
+        "customerName": "Aline Mugabo",
+        "paymentPhone": "0788123456",
+        "paymentMethod": "MTN Mobile Money",
+        "amountPaid": 36500,
+        "transactionId": "TXN1792398749870",
+        "submittedAt": "2026-10-19T08:32:29.872Z",
+        "verificationStatus": "Approved",
+        "verifiedAt": "2026-10-19T08:32:29.875Z",
+        "verifiedBy": "Ruth (System Owner)",
+        "adminNotes": "Verified via MTN MoMo statement."
+      }
+    },
+    {
+      "id": "ord-1792398624346-87d88a",
+      "orderNumber": "CRM-51747",
+      "trackingToken": "f26cabd6156a4fae9f0074da50900992",
+      "createdAt": "2026-10-19T08:30:24.346Z",
+      "customerName": "Aline Mugabo",
+      "customerPhone": "0788123456",
+      "deliveryType": "delivery",
+      "deliveryLocation": "Gasabo (Kimironko)",
+      "deliveryAddress": "KG 15 Ave, Kimironko",
+      "items": [
+        {
+          "productId": "prod-1792398624341-9afac3",
+          "productName": "Wireless Studio Bluetooth Headphones",
+          "price": 35000,
+          "quantity": 1,
+          "imageUrl": "/src/assets/images/product_street_sneakers_1791966366958.jpg",
+          "sku": "CRM-ELE-3271"
+        }
+      ],
+      "subtotal": 35000,
+      "deliveryFee": 1500,
+      "totalAmount": 36500,
+      "commissionRate": 10,
+      "commissionEarned": 3500,
+      "supplierPayoutAmount": 31500,
+      "supplierPayoutStatus": "Pending",
+      "supplierFulfillmentStatus": "Pending",
+      "paymentMethod": "MTN Mobile Money",
+      "receiverName": "Ruth",
+      "receiverDetails": "078002260",
+      "shopName": "Kigali Quality Audio Ltd",
+      "paymentStatus": "Paid",
+      "status": "Confirmed",
+      "stockDeducted": true,
+      "statusHistory": [
+        {
+          "status": "New",
+          "paymentStatus": "Pending Payment",
+          "timestamp": "2026-10-19T08:30:24.346Z",
+          "note": "Order successfully created. Awaiting mobile money payment initiation."
+        },
+        {
+          "status": "New",
+          "paymentStatus": "Pending Verification",
+          "timestamp": "2026-10-19T08:30:24.354Z",
+          "note": "Payment confirmation submitted. Txn ID: TXN1792398624352, Phone: 0788123456. Pending verification."
+        },
+        {
+          "status": "Confirmed",
+          "paymentStatus": "Paid",
+          "timestamp": "2026-10-19T08:30:24.357Z",
+          "note": "Payment verified & approved by Ruth (System Owner): 36,500 FRW (TXN1792398624352).",
+          "updatedBy": "Ruth (System Owner)"
+        }
+      ],
+      "paymentConfirmation": {
+        "id": "conf-1792398624354-c8cac1",
+        "orderId": "ord-1792398624346-87d88a",
+        "orderNumber": "CRM-51747",
+        "customerName": "Aline Mugabo",
+        "paymentPhone": "0788123456",
+        "paymentMethod": "MTN Mobile Money",
+        "amountPaid": 36500,
+        "transactionId": "TXN1792398624352",
+        "submittedAt": "2026-10-19T08:30:24.354Z",
+        "verificationStatus": "Approved",
+        "verifiedAt": "2026-10-19T08:30:24.357Z",
+        "verifiedBy": "Ruth (System Owner)",
+        "adminNotes": "Verified via MTN MoMo statement."
+      }
+    },
+    {
+      "id": "ord-1792396589064-b2d4af",
+      "orderNumber": "CRM-74968",
+      "trackingToken": "7083e3fb1a77a0ca12d069175817801e",
+      "createdAt": "2026-10-19T07:56:29.064Z",
+      "customerName": "Aline Mugabo",
+      "customerPhone": "0788123456",
+      "deliveryType": "delivery",
+      "deliveryLocation": "Gasabo (Kimironko)",
+      "deliveryAddress": "KG 15 Ave, Kimironko",
+      "items": [
+        {
+          "productId": "prod-1792396589060-e8ad35",
+          "productName": "Wireless Studio Bluetooth Headphones",
+          "price": 35000,
+          "quantity": 1,
+          "imageUrl": "/src/assets/images/product_street_sneakers_1791966366958.jpg",
+          "sku": "CRM-ELE-2965"
+        }
+      ],
+      "subtotal": 35000,
+      "deliveryFee": 1500,
+      "totalAmount": 36500,
+      "commissionRate": 10,
+      "commissionEarned": 3500,
+      "supplierPayoutAmount": 31500,
+      "supplierPayoutStatus": "Pending",
+      "supplierFulfillmentStatus": "Pending",
+      "paymentMethod": "MTN Mobile Money",
+      "receiverName": "Ruth",
+      "receiverDetails": "078002260",
+      "shopName": "Kigali Quality Audio Ltd",
+      "paymentStatus": "Paid",
+      "status": "Confirmed",
+      "stockDeducted": true,
+      "statusHistory": [
+        {
+          "status": "New",
+          "paymentStatus": "Pending Payment",
+          "timestamp": "2026-10-19T07:56:29.064Z",
+          "note": "Order successfully created. Awaiting mobile money payment initiation."
+        },
+        {
+          "status": "New",
+          "paymentStatus": "Pending Verification",
+          "timestamp": "2026-10-19T07:56:29.075Z",
+          "note": "Payment confirmation submitted. Txn ID: TXN1792396589073, Phone: 0788123456. Pending verification."
+        },
+        {
+          "status": "Confirmed",
+          "paymentStatus": "Paid",
+          "timestamp": "2026-10-19T07:56:29.106Z",
+          "note": "Payment verified & approved by Ruth (System Owner): 36,500 FRW (TXN1792396589073).",
+          "updatedBy": "Ruth (System Owner)"
+        }
+      ],
+      "paymentConfirmation": {
+        "id": "conf-1792396589075-0bddd6",
+        "orderId": "ord-1792396589064-b2d4af",
+        "orderNumber": "CRM-74968",
+        "customerName": "Aline Mugabo",
+        "paymentPhone": "0788123456",
+        "paymentMethod": "MTN Mobile Money",
+        "amountPaid": 36500,
+        "transactionId": "TXN1792396589073",
+        "submittedAt": "2026-10-19T07:56:29.075Z",
+        "verificationStatus": "Approved",
+        "verifiedAt": "2026-10-19T07:56:29.106Z",
+        "verifiedBy": "Ruth (System Owner)",
+        "adminNotes": "Verified via MTN MoMo statement."
+      }
+    },
+    {
+      "id": "ord-1792396246576-9d3319",
+      "orderNumber": "CRM-26392",
+      "trackingToken": "642c3c4794073cc6203755333972c50f",
+      "createdAt": "2026-10-19T07:50:46.576Z",
+      "customerName": "Aline Mugabo",
+      "customerPhone": "0788123456",
+      "deliveryType": "delivery",
+      "deliveryLocation": "Gasabo (Kimironko)",
+      "deliveryAddress": "KG 15 Ave, Kimironko",
+      "items": [
+        {
+          "productId": "prod-1792396246571-754ebd",
+          "productName": "Wireless Studio Bluetooth Headphones",
+          "price": 35000,
+          "quantity": 1,
+          "imageUrl": "/src/assets/images/product_street_sneakers_1791966366958.jpg",
+          "sku": "CRM-ELE-5154"
+        }
+      ],
+      "subtotal": 35000,
+      "deliveryFee": 1500,
+      "totalAmount": 36500,
+      "commissionRate": 10,
+      "commissionEarned": 3500,
+      "supplierPayoutAmount": 31500,
+      "supplierPayoutStatus": "Pending",
+      "supplierFulfillmentStatus": "Pending",
+      "paymentMethod": "MTN Mobile Money",
+      "receiverName": "Ruth",
+      "receiverDetails": "078002260",
+      "shopName": "Kigali Quality Audio Ltd",
+      "paymentStatus": "Paid",
+      "status": "Confirmed",
+      "stockDeducted": true,
+      "statusHistory": [
+        {
+          "status": "New",
+          "paymentStatus": "Pending Payment",
+          "timestamp": "2026-10-19T07:50:46.576Z",
+          "note": "Order successfully created. Awaiting mobile money payment initiation."
+        },
+        {
+          "status": "New",
+          "paymentStatus": "Pending Verification",
+          "timestamp": "2026-10-19T07:50:46.584Z",
+          "note": "Payment confirmation submitted. Txn ID: TXN1792396246582, Phone: 0788123456. Pending verification."
+        },
+        {
+          "status": "Confirmed",
+          "paymentStatus": "Paid",
+          "timestamp": "2026-10-19T07:50:46.587Z",
+          "note": "Payment verified & approved by Ruth (System Owner): 36,500 FRW (TXN1792396246582).",
+          "updatedBy": "Ruth (System Owner)"
+        }
+      ],
+      "paymentConfirmation": {
+        "id": "conf-1792396246584-c40fd3",
+        "orderId": "ord-1792396246576-9d3319",
+        "orderNumber": "CRM-26392",
+        "customerName": "Aline Mugabo",
+        "paymentPhone": "0788123456",
+        "paymentMethod": "MTN Mobile Money",
+        "amountPaid": 36500,
+        "transactionId": "TXN1792396246582",
+        "submittedAt": "2026-10-19T07:50:46.584Z",
+        "verificationStatus": "Approved",
+        "verifiedAt": "2026-10-19T07:50:46.587Z",
+        "verifiedBy": "Ruth (System Owner)",
+        "adminNotes": "Verified via MTN MoMo statement."
+      }
+    }
+  ],
+  "paymentConfirmations": [
+    {
+      "id": "conf-1792484893255-49bc03",
+      "orderId": "ord-1792484893235-cfdb1e",
+      "orderNumber": "CRM-13634",
+      "customerName": "Aline Mugabo",
+      "paymentPhone": "0788123456",
+      "paymentMethod": "MTN Mobile Money",
+      "amountPaid": 36500,
+      "transactionId": "TXN1792484893253",
+      "submittedAt": "2026-10-20T08:28:13.256Z",
+      "verificationStatus": "Approved",
+      "verifiedAt": "2026-10-20T08:28:13.260Z",
+      "verifiedBy": "Ruth (System Owner)",
+      "adminNotes": "Verified via MTN MoMo statement."
+    },
+    {
+      "id": "conf-1792484463950-a5d7d6",
+      "orderId": "ord-1792484463935-c6c735",
+      "orderNumber": "CRM-78945",
+      "customerName": "Aline Mugabo",
+      "paymentPhone": "0788123456",
+      "paymentMethod": "MTN Mobile Money",
+      "amountPaid": 36500,
+      "transactionId": "TXN1792484463949",
+      "submittedAt": "2026-10-20T08:21:03.950Z",
+      "verificationStatus": "Approved",
+      "verifiedAt": "2026-10-20T08:21:03.954Z",
+      "verifiedBy": "Ruth (System Owner)",
+      "adminNotes": "Verified via MTN MoMo statement."
+    },
+    {
+      "id": "conf-1792399295752-2c03bd",
+      "orderId": "ord-1792399295743-98e166",
+      "orderNumber": "CRM-35715",
+      "customerName": "Aline Mugabo",
+      "paymentPhone": "0788123456",
+      "paymentMethod": "MTN Mobile Money",
+      "amountPaid": 36500,
+      "transactionId": "TXN1792399295750",
+      "submittedAt": "2026-10-19T08:41:35.752Z",
+      "verificationStatus": "Approved",
+      "verifiedAt": "2026-10-19T08:41:35.756Z",
+      "verifiedBy": "Ruth (System Owner)",
+      "adminNotes": "Verified via MTN MoMo statement."
+    },
+    {
+      "id": "conf-1792398749872-f978e3",
+      "orderId": "ord-1792398749860-bca52a",
+      "orderNumber": "CRM-22969",
+      "customerName": "Aline Mugabo",
+      "paymentPhone": "0788123456",
+      "paymentMethod": "MTN Mobile Money",
+      "amountPaid": 36500,
+      "transactionId": "TXN1792398749870",
+      "submittedAt": "2026-10-19T08:32:29.872Z",
+      "verificationStatus": "Approved",
+      "verifiedAt": "2026-10-19T08:32:29.875Z",
+      "verifiedBy": "Ruth (System Owner)",
+      "adminNotes": "Verified via MTN MoMo statement."
+    },
+    {
+      "id": "conf-1792398624354-c8cac1",
+      "orderId": "ord-1792398624346-87d88a",
+      "orderNumber": "CRM-51747",
+      "customerName": "Aline Mugabo",
+      "paymentPhone": "0788123456",
+      "paymentMethod": "MTN Mobile Money",
+      "amountPaid": 36500,
+      "transactionId": "TXN1792398624352",
+      "submittedAt": "2026-10-19T08:30:24.354Z",
+      "verificationStatus": "Approved",
+      "verifiedAt": "2026-10-19T08:30:24.357Z",
+      "verifiedBy": "Ruth (System Owner)",
+      "adminNotes": "Verified via MTN MoMo statement."
+    },
+    {
+      "id": "conf-1792396589075-0bddd6",
+      "orderId": "ord-1792396589064-b2d4af",
+      "orderNumber": "CRM-74968",
+      "customerName": "Aline Mugabo",
+      "paymentPhone": "0788123456",
+      "paymentMethod": "MTN Mobile Money",
+      "amountPaid": 36500,
+      "transactionId": "TXN1792396589073",
+      "submittedAt": "2026-10-19T07:56:29.075Z",
+      "verificationStatus": "Approved",
+      "verifiedAt": "2026-10-19T07:56:29.106Z",
+      "verifiedBy": "Ruth (System Owner)",
+      "adminNotes": "Verified via MTN MoMo statement."
+    },
+    {
+      "id": "conf-1792396246584-c40fd3",
+      "orderId": "ord-1792396246576-9d3319",
+      "orderNumber": "CRM-26392",
+      "customerName": "Aline Mugabo",
+      "paymentPhone": "0788123456",
+      "paymentMethod": "MTN Mobile Money",
+      "amountPaid": 36500,
+      "transactionId": "TXN1792396246582",
+      "submittedAt": "2026-10-19T07:50:46.584Z",
+      "verificationStatus": "Approved",
+      "verifiedAt": "2026-10-19T07:50:46.587Z",
+      "verifiedBy": "Ruth (System Owner)",
+      "adminNotes": "Verified via MTN MoMo statement."
+    }
+  ],
+  "paymentMethodsConfig": [
+    {
+      "id": "pm-mtn-momo",
+      "name": "MTN Mobile Money (Direct Transfer)",
+      "type": "MTN Mobile Money",
+      "receiverName": "Ruth",
+      "receiverAccount": "078002260",
+      "instructions": "Dial *182*1*1*078002260*AMOUNT# to send mobile money directly to Ruth.",
+      "isActive": true
+    },
+    {
+      "id": "pm-mtn-merchant",
+      "name": "MTN MoMoPay (Merchant Code)",
+      "type": "MTN Merchant Code",
+      "receiverName": "ContactReach Market",
+      "receiverAccount": "078002",
+      "instructions": "Dial *182*8*1*078002*AMOUNT# to pay Ruth / ContactReach Market merchant.",
+      "isActive": true
+    },
+    {
+      "id": "pm-airtel",
+      "name": "Airtel Money",
+      "type": "Airtel Money",
+      "receiverName": "Ruth",
+      "receiverAccount": "078002260",
+      "instructions": "Dial *182*1*2*078002260*AMOUNT# to pay via Airtel Money.",
+      "isActive": true
+    },
+    {
+      "id": "pm-bank",
+      "name": "Bank Transfer / I&M Bank Rwanda",
+      "type": "Bank Transfer",
+      "receiverName": "ContactReach Media Ltd",
+      "receiverAccount": "00014-0239102-19 (I&M Bank)",
+      "instructions": "Transfer to ContactReach Media Ltd, Account 00014-0239102-19. Use your Order # as reference.",
+      "isActive": true
+    },
+    {
+      "id": "pm-cod",
+      "name": "Cash on Pickup / Collection",
+      "type": "Cash on Delivery",
+      "receiverName": "Ruth / Warehouse Desk",
+      "receiverAccount": "Fair View Plaza, Kigali",
+      "instructions": "Pay in cash when picking up your packaged order at Fair View Plaza, Kigali.",
+      "isActive": true
+    }
+  ],
+  "messages": [
+    {
+      "id": "msg-1792396170238-640a",
+      "name": "ngewe",
+      "email": "test@g.c",
+      "phone": "07777",
+      "subject": "ubujura",
+      "message": "twibwe",
+      "orderNumber": "3222",
+      "createdAt": "2026-10-19T07:49:30.238Z",
+      "status": "read"
+    }
+  ],
+  "customerProblems": [],
+  "coupons": [
+    {
+      "id": "coup-welcome",
+      "code": "WELCOME10",
+      "discountType": "percentage",
+      "discountValue": 10,
+      "minOrderAmount": 10000,
+      "maxDiscount": 10000,
+      "expiresAt": "2026-12-31T23:59:59Z",
+      "usageLimit": 500,
+      "timesUsed": 0,
+      "isActive": true
+    }
+  ],
+  "inventoryLogs": [
+    {
+      "id": "inv-1792484893303",
+      "productId": "prod-1792484893303-da41ca",
+      "productName": "Glow Facial Vitamin C Serum (20% OFF Special)",
+      "previousStock": 0,
+      "newStock": 40,
+      "changeAmount": 40,
+      "reason": "Initial stock intake upon product creation",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-20T08:28:13.303Z"
+    },
+    {
+      "id": "inv-1792484893260",
+      "productId": "prod-1792484893228-7c1563",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 15,
+      "newStock": 14,
+      "changeAmount": -1,
+      "reason": "Stock deducted for approved payment on order CRM-13634",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-20T08:28:13.260Z"
+    },
+    {
+      "id": "inv-1792484893228",
+      "productId": "prod-1792484893228-7c1563",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 0,
+      "newStock": 15,
+      "changeAmount": 15,
+      "reason": "Initial stock intake upon product creation",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-20T08:28:13.228Z"
+    },
+    {
+      "id": "inv-1792484463988",
+      "productId": "prod-1792484463988-6b4849",
+      "productName": "Glow Facial Vitamin C Serum (20% OFF Special)",
+      "previousStock": 0,
+      "newStock": 40,
+      "changeAmount": 40,
+      "reason": "Initial stock intake upon product creation",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-20T08:21:03.988Z"
+    },
+    {
+      "id": "inv-1792484463955",
+      "productId": "prod-1792484463929-bc6f9e",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 15,
+      "newStock": 14,
+      "changeAmount": -1,
+      "reason": "Stock deducted for approved payment on order CRM-78945",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-20T08:21:03.955Z"
+    },
+    {
+      "id": "inv-1792484463929",
+      "productId": "prod-1792484463929-bc6f9e",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 0,
+      "newStock": 15,
+      "changeAmount": 15,
+      "reason": "Initial stock intake upon product creation",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-20T08:21:03.929Z"
+    },
+    {
+      "id": "inv-1792399295756",
+      "productId": "prod-1792399295737-588d60",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 15,
+      "newStock": 14,
+      "changeAmount": -1,
+      "reason": "Stock deducted for approved payment on order CRM-35715",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-19T08:41:35.756Z"
+    },
+    {
+      "id": "inv-1792399295737",
+      "productId": "prod-1792399295737-588d60",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 0,
+      "newStock": 15,
+      "changeAmount": 15,
+      "reason": "Initial stock intake upon product creation",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-19T08:41:35.737Z"
+    },
+    {
+      "id": "inv-1792398749875",
+      "productId": "prod-1792398749855-15b0a7",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 15,
+      "newStock": 14,
+      "changeAmount": -1,
+      "reason": "Stock deducted for approved payment on order CRM-22969",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-19T08:32:29.875Z"
+    },
+    {
+      "id": "inv-1792398749855",
+      "productId": "prod-1792398749855-15b0a7",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 0,
+      "newStock": 15,
+      "changeAmount": 15,
+      "reason": "Initial stock intake upon product creation",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-19T08:32:29.855Z"
+    },
+    {
+      "id": "inv-1792398624357",
+      "productId": "prod-1792398624341-9afac3",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 15,
+      "newStock": 14,
+      "changeAmount": -1,
+      "reason": "Stock deducted for approved payment on order CRM-51747",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-19T08:30:24.357Z"
+    },
+    {
+      "id": "inv-1792398624341",
+      "productId": "prod-1792398624341-9afac3",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 0,
+      "newStock": 15,
+      "changeAmount": 15,
+      "reason": "Initial stock intake upon product creation",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-19T08:30:24.341Z"
+    },
+    {
+      "id": "inv-1792396589106",
+      "productId": "prod-1792396589060-e8ad35",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 15,
+      "newStock": 14,
+      "changeAmount": -1,
+      "reason": "Stock deducted for approved payment on order CRM-74968",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-19T07:56:29.106Z"
+    },
+    {
+      "id": "inv-1792396589060",
+      "productId": "prod-1792396589060-e8ad35",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 0,
+      "newStock": 15,
+      "changeAmount": 15,
+      "reason": "Initial stock intake upon product creation",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-19T07:56:29.060Z"
+    },
+    {
+      "id": "inv-1792396246587",
+      "productId": "prod-1792396246571-754ebd",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 15,
+      "newStock": 14,
+      "changeAmount": -1,
+      "reason": "Stock deducted for approved payment on order CRM-26392",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-19T07:50:46.587Z"
+    },
+    {
+      "id": "inv-1792396246572",
+      "productId": "prod-1792396246571-754ebd",
+      "productName": "Wireless Studio Bluetooth Headphones",
+      "previousStock": 0,
+      "newStock": 15,
+      "changeAmount": 15,
+      "reason": "Initial stock intake upon product creation",
+      "adminName": "Ruth (System Owner)",
+      "timestamp": "2026-10-19T07:50:46.572Z"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "aud-1792484893308-c8bf",
+      "timestamp": "2026-10-20T08:28:13.308Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_UPDATED",
+      "details": "Updated product \"Glow Facial Vitamin C Serum (20% OFF Special)\"",
+      "entityType": "product",
+      "entityId": "prod-1792484893303-da41ca"
+    },
+    {
+      "id": "aud-1792484893303-0f92",
+      "timestamp": "2026-10-20T08:28:13.303Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_CREATED",
+      "details": "Created product \"Glow Facial Vitamin C Serum (20% OFF Special)\" (SKU: CRM-HAI-2369) with stock 40",
+      "entityType": "product",
+      "entityId": "prod-1792484893303-da41ca"
+    },
+    {
+      "id": "aud-1792484893261-2695",
+      "timestamp": "2026-10-20T08:28:13.261Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PAYMENT_APPROVED",
+      "details": "Approved payment of 36500 FRW for Order #CRM-13634 (Txn: TXN1792484893253)",
+      "entityType": "payment",
+      "entityId": "conf-1792484893255-49bc03"
+    },
+    {
+      "id": "aud-1792484893228-6999",
+      "timestamp": "2026-10-20T08:28:13.228Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_CREATED",
+      "details": "Created product \"Wireless Studio Bluetooth Headphones\" (SKU: CRM-ELE-6687) with stock 15",
+      "entityType": "product",
+      "entityId": "prod-1792484893228-7c1563"
+    },
+    {
+      "id": "aud-1792484893222-5989",
+      "timestamp": "2026-10-20T08:28:13.222Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "SUPPLIER_APPLICATION_REVIEWED",
+      "details": "Supplier application for \"Kigali Quality Audio Ltd\" set to Approved",
+      "entityType": "supplier_application",
+      "entityId": "supp-app-1792484893210-3465"
+    },
+    {
+      "id": "aud-1792484893174-9e0d",
+      "timestamp": "2026-10-20T08:28:13.174Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "ADMIN_LOGIN",
+      "details": "Admin signed in successfully from 127.0.0.1"
+    },
+    {
+      "id": "aud-1792484463997-bc23",
+      "timestamp": "2026-10-20T08:21:03.997Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_UPDATED",
+      "details": "Updated product \"Glow Facial Vitamin C Serum (20% OFF Special)\"",
+      "entityType": "product",
+      "entityId": "prod-1792484463988-6b4849"
+    },
+    {
+      "id": "aud-1792484463988-71f3",
+      "timestamp": "2026-10-20T08:21:03.988Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_CREATED",
+      "details": "Created product \"Glow Facial Vitamin C Serum (20% OFF Special)\" (SKU: CRM-HAI-4069) with stock 40",
+      "entityType": "product",
+      "entityId": "prod-1792484463988-6b4849"
+    },
+    {
+      "id": "aud-1792484463955-9660",
+      "timestamp": "2026-10-20T08:21:03.955Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PAYMENT_APPROVED",
+      "details": "Approved payment of 36500 FRW for Order #CRM-78945 (Txn: TXN1792484463949)",
+      "entityType": "payment",
+      "entityId": "conf-1792484463950-a5d7d6"
+    },
+    {
+      "id": "aud-1792484463929-a4ec",
+      "timestamp": "2026-10-20T08:21:03.929Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_CREATED",
+      "details": "Created product \"Wireless Studio Bluetooth Headphones\" (SKU: CRM-ELE-7805) with stock 15",
+      "entityType": "product",
+      "entityId": "prod-1792484463929-bc6f9e"
+    },
+    {
+      "id": "aud-1792484463924-6bc0",
+      "timestamp": "2026-10-20T08:21:03.925Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "SUPPLIER_APPLICATION_REVIEWED",
+      "details": "Supplier application for \"Kigali Quality Audio Ltd\" set to Approved",
+      "entityType": "supplier_application",
+      "entityId": "supp-app-1792484463914-1869"
+    },
+    {
+      "id": "aud-1792484463879-b356",
+      "timestamp": "2026-10-20T08:21:03.879Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "ADMIN_LOGIN",
+      "details": "Admin signed in successfully from 127.0.0.1"
+    },
+    {
+      "id": "aud-1792399303185-9ed0",
+      "timestamp": "2026-10-19T08:41:43.185Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "ADMIN_LOGIN",
+      "details": "Admin signed in successfully from 127.0.0.1"
+    },
+    {
+      "id": "aud-1792399295756-d9c2",
+      "timestamp": "2026-10-19T08:41:35.756Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PAYMENT_APPROVED",
+      "details": "Approved payment of 36500 FRW for Order #CRM-35715 (Txn: TXN1792399295750)",
+      "entityType": "payment",
+      "entityId": "conf-1792399295752-2c03bd"
+    },
+    {
+      "id": "aud-1792399295737-a55e",
+      "timestamp": "2026-10-19T08:41:35.737Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_CREATED",
+      "details": "Created product \"Wireless Studio Bluetooth Headphones\" (SKU: CRM-ELE-1364) with stock 15",
+      "entityType": "product",
+      "entityId": "prod-1792399295737-588d60"
+    },
+    {
+      "id": "aud-1792399295715-a6c0",
+      "timestamp": "2026-10-19T08:41:35.715Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "SUPPLIER_APPLICATION_REVIEWED",
+      "details": "Supplier application for \"Kigali Quality Audio Ltd\" set to Approved",
+      "entityType": "supplier_application",
+      "entityId": "supp-app-1792399295705-053b"
+    },
+    {
+      "id": "aud-1792399295686-28b0",
+      "timestamp": "2026-10-19T08:41:35.686Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "ADMIN_LOGIN",
+      "details": "Admin signed in successfully from 127.0.0.1"
+    },
+    {
+      "id": "aud-1792398749875-8ebd",
+      "timestamp": "2026-10-19T08:32:29.875Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PAYMENT_APPROVED",
+      "details": "Approved payment of 36500 FRW for Order #CRM-22969 (Txn: TXN1792398749870)",
+      "entityType": "payment",
+      "entityId": "conf-1792398749872-f978e3"
+    },
+    {
+      "id": "aud-1792398749855-db99",
+      "timestamp": "2026-10-19T08:32:29.855Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_CREATED",
+      "details": "Created product \"Wireless Studio Bluetooth Headphones\" (SKU: CRM-ELE-8119) with stock 15",
+      "entityType": "product",
+      "entityId": "prod-1792398749855-15b0a7"
+    },
+    {
+      "id": "aud-1792398749849-5328",
+      "timestamp": "2026-10-19T08:32:29.849Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "SUPPLIER_APPLICATION_REVIEWED",
+      "details": "Supplier application for \"Kigali Quality Audio Ltd\" set to Approved",
+      "entityType": "supplier_application",
+      "entityId": "supp-app-1792398749836-82e7"
+    },
+    {
+      "id": "aud-1792398749808-bc34",
+      "timestamp": "2026-10-19T08:32:29.808Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "ADMIN_LOGIN",
+      "details": "Admin signed in successfully from 127.0.0.1"
+    },
+    {
+      "id": "aud-1792398624357-dc74",
+      "timestamp": "2026-10-19T08:30:24.357Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PAYMENT_APPROVED",
+      "details": "Approved payment of 36500 FRW for Order #CRM-51747 (Txn: TXN1792398624352)",
+      "entityType": "payment",
+      "entityId": "conf-1792398624354-c8cac1"
+    },
+    {
+      "id": "aud-1792398624341-130c",
+      "timestamp": "2026-10-19T08:30:24.341Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_CREATED",
+      "details": "Created product \"Wireless Studio Bluetooth Headphones\" (SKU: CRM-ELE-3271) with stock 15",
+      "entityType": "product",
+      "entityId": "prod-1792398624341-9afac3"
+    },
+    {
+      "id": "aud-1792398624338-3346",
+      "timestamp": "2026-10-19T08:30:24.338Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "SUPPLIER_APPLICATION_REVIEWED",
+      "details": "Supplier application for \"Kigali Quality Audio Ltd\" set to Approved",
+      "entityType": "supplier_application",
+      "entityId": "supp-app-1792398624321-1323"
+    },
+    {
+      "id": "aud-1792398624301-129b",
+      "timestamp": "2026-10-19T08:30:24.301Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "ADMIN_LOGIN",
+      "details": "Admin signed in successfully from 127.0.0.1"
+    },
+    {
+      "id": "aud-1792396589106-a07b",
+      "timestamp": "2026-10-19T07:56:29.106Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PAYMENT_APPROVED",
+      "details": "Approved payment of 36500 FRW for Order #CRM-74968 (Txn: TXN1792396589073)",
+      "entityType": "payment",
+      "entityId": "conf-1792396589075-0bddd6"
+    },
+    {
+      "id": "aud-1792396589060-f163",
+      "timestamp": "2026-10-19T07:56:29.060Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_CREATED",
+      "details": "Created product \"Wireless Studio Bluetooth Headphones\" (SKU: CRM-ELE-2965) with stock 15",
+      "entityType": "product",
+      "entityId": "prod-1792396589060-e8ad35"
+    },
+    {
+      "id": "aud-1792396589055-ebde",
+      "timestamp": "2026-10-19T07:56:29.055Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "SUPPLIER_APPLICATION_REVIEWED",
+      "details": "Supplier application for \"Kigali Quality Audio Ltd\" set to Approved",
+      "entityType": "supplier_application",
+      "entityId": "supp-app-1792396589037-5dc6"
+    },
+    {
+      "id": "aud-1792396589008-292b",
+      "timestamp": "2026-10-19T07:56:29.008Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "ADMIN_LOGIN",
+      "details": "Admin signed in successfully from 127.0.0.1"
+    },
+    {
+      "id": "aud-1792396246587-b4a4",
+      "timestamp": "2026-10-19T07:50:46.587Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PAYMENT_APPROVED",
+      "details": "Approved payment of 36500 FRW for Order #CRM-26392 (Txn: TXN1792396246582)",
+      "entityType": "payment",
+      "entityId": "conf-1792396246584-c40fd3"
+    },
+    {
+      "id": "aud-1792396246572-6aad",
+      "timestamp": "2026-10-19T07:50:46.572Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "PRODUCT_CREATED",
+      "details": "Created product \"Wireless Studio Bluetooth Headphones\" (SKU: CRM-ELE-5154) with stock 15",
+      "entityType": "product",
+      "entityId": "prod-1792396246571-754ebd"
+    },
+    {
+      "id": "aud-1792396246566-fb0a",
+      "timestamp": "2026-10-19T07:50:46.566Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "SUPPLIER_APPLICATION_REVIEWED",
+      "details": "Supplier application for \"Kigali Quality Audio Ltd\" set to Approved",
+      "entityType": "supplier_application",
+      "entityId": "supp-app-1792396246560-412f"
+    },
+    {
+      "id": "aud-1792396246483-a023",
+      "timestamp": "2026-10-19T07:50:46.483Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "ADMIN_LOGIN",
+      "details": "Admin signed in successfully from 127.0.0.1"
+    },
+    {
+      "id": "aud-1792395946425-15b7",
+      "timestamp": "2026-10-19T07:45:46.425Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "FIREBASE_GOOGLE_LOGIN",
+      "details": "Admin signed in with Google Firebase Auth (contactreachmedialimited@gmail.com)"
+    },
+    {
+      "id": "aud-1792395786136-af81",
+      "timestamp": "2026-10-19T07:43:06.136Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "FIREBASE_GOOGLE_LOGIN",
+      "details": "Admin signed in with Google Firebase Auth (contactreachmedialimited@gmail.com)"
+    },
+    {
+      "id": "aud-init",
+      "timestamp": "2026-10-15T00:00:00.000Z",
+      "adminName": "Ruth (System Owner)",
+      "adminRole": "owner",
+      "action": "SYSTEM_PURGE_DEMO_DATA",
+      "details": "Demo content and mock figures purged. ContactReach Market configured for genuine supplier onboarding and live orders."
+    }
+  ],
+  "customers": [
+    {
+      "id": "cust-1792396246576",
+      "name": "Aline Mugabo",
+      "phone": "0788123456",
+      "deliveryAddress": "KG 15 Ave, Kimironko",
+      "createdAt": "2026-10-19T07:50:46.576Z",
+      "totalOrders": 7,
+      "totalSpent": 255500
+    },
+    {
+      "id": "cust-1792484463972-89ed",
+      "name": "Gisele Uwase",
+      "phone": "0789317131",
+      "deliveryAddress": "Kigali, Kicukiro, Sonatubes",
+      "createdAt": "2026-10-20T08:21:03.972Z",
+      "totalOrders": 0,
+      "totalSpent": 0,
+      "status": "Active",
+      "accountType": "buyer",
+      "lastLogin": "2026-10-20T08:21:03.975Z",
+      "passwordHash": "6960b12007a48aa13de0b322f185c2c1c57de41a4e8524c9e60e3733272a7f87"
+    },
+    {
+      "id": "cust-g-google_uid_1792484893270",
+      "name": "Gisele Uwase",
+      "phone": "0789123456",
+      "email": "buyer.shopper.1792484893270@gmail.com",
+      "deliveryAddress": "Kigali, Kicukiro, Sonatubes",
+      "createdAt": "2026-10-20T08:28:13.275Z",
+      "totalOrders": 0,
+      "totalSpent": 0,
+      "status": "Active",
+      "accountType": "buyer",
+      "lastLogin": "2026-10-20T08:28:13.275Z",
+      "photoURL": "https://lh3.googleusercontent.com/a/default-user",
+      "googleUid": "google_uid_1792484893270",
+      "authProvider": "google",
+      "isRegisteredBuyer": true
+    }
+  ],
+  "adminUsers": [
+    {
+      "id": "adm-owner-ruth",
+      "name": "Ruth (System Owner)",
+      "email": "contactreachmedialimited@gmail.com",
+      "role": "owner",
+      "active": true,
+      "phone": "+250 780 022 600",
+      "lastLogin": "2026-10-20T08:28:13.174Z"
+    }
+  ],
+  "reviews": [],
+  "supplierApplications": [
+    {
+      "id": "supp-app-1792484893210-3465",
+      "businessName": "Kigali Quality Audio Ltd",
+      "ownerName": "Jean Paul",
+      "phone": "0788990011",
+      "email": "jeanpaul@qualityaudio.rw",
+      "location": "Downtown Kigali, Quartier Commercial",
+      "category": "electronics",
+      "description": "Authorized importer of sound systems and smart audio accessories.",
+      "status": "Approved",
+      "createdAt": "2026-10-20T08:28:13.210Z",
+      "reviewedBy": "Ruth (System Owner)",
+      "reviewedAt": "2026-10-20T08:28:13.221Z"
+    },
+    {
+      "id": "supp-app-1792484463914-1869",
+      "businessName": "Kigali Quality Audio Ltd",
+      "ownerName": "Jean Paul",
+      "phone": "0788990011",
+      "email": "jeanpaul@qualityaudio.rw",
+      "location": "Downtown Kigali, Quartier Commercial",
+      "category": "electronics",
+      "description": "Authorized importer of sound systems and smart audio accessories.",
+      "status": "Approved",
+      "createdAt": "2026-10-20T08:21:03.914Z",
+      "reviewedBy": "Ruth (System Owner)",
+      "reviewedAt": "2026-10-20T08:21:03.924Z"
+    },
+    {
+      "id": "supp-app-1792399295705-053b",
+      "businessName": "Kigali Quality Audio Ltd",
+      "ownerName": "Jean Paul",
+      "phone": "0788990011",
+      "email": "jeanpaul@qualityaudio.rw",
+      "location": "Downtown Kigali, Quartier Commercial",
+      "category": "electronics",
+      "description": "Authorized importer of sound systems and smart audio accessories.",
+      "status": "Approved",
+      "createdAt": "2026-10-19T08:41:35.705Z",
+      "reviewedBy": "Ruth (System Owner)",
+      "reviewedAt": "2026-10-19T08:41:35.715Z"
+    },
+    {
+      "id": "supp-app-1792398749836-82e7",
+      "businessName": "Kigali Quality Audio Ltd",
+      "ownerName": "Jean Paul",
+      "phone": "0788990011",
+      "email": "jeanpaul@qualityaudio.rw",
+      "location": "Downtown Kigali, Quartier Commercial",
+      "category": "electronics",
+      "description": "Authorized importer of sound systems and smart audio accessories.",
+      "status": "Approved",
+      "createdAt": "2026-10-19T08:32:29.836Z",
+      "reviewedBy": "Ruth (System Owner)",
+      "reviewedAt": "2026-10-19T08:32:29.849Z"
+    },
+    {
+      "id": "supp-app-1792398624321-1323",
+      "businessName": "Kigali Quality Audio Ltd",
+      "ownerName": "Jean Paul",
+      "phone": "0788990011",
+      "email": "jeanpaul@qualityaudio.rw",
+      "location": "Downtown Kigali, Quartier Commercial",
+      "category": "electronics",
+      "description": "Authorized importer of sound systems and smart audio accessories.",
+      "status": "Approved",
+      "createdAt": "2026-10-19T08:30:24.322Z",
+      "reviewedBy": "Ruth (System Owner)",
+      "reviewedAt": "2026-10-19T08:30:24.338Z"
+    },
+    {
+      "id": "supp-app-1792396589037-5dc6",
+      "businessName": "Kigali Quality Audio Ltd",
+      "ownerName": "Jean Paul",
+      "phone": "0788990011",
+      "email": "jeanpaul@qualityaudio.rw",
+      "location": "Downtown Kigali, Quartier Commercial",
+      "category": "electronics",
+      "description": "Authorized importer of sound systems and smart audio accessories.",
+      "status": "Approved",
+      "createdAt": "2026-10-19T07:56:29.038Z",
+      "reviewedBy": "Ruth (System Owner)",
+      "reviewedAt": "2026-10-19T07:56:29.055Z"
+    },
+    {
+      "id": "supp-app-1792396246560-412f",
+      "businessName": "Kigali Quality Audio Ltd",
+      "ownerName": "Jean Paul",
+      "phone": "0788990011",
+      "email": "jeanpaul@qualityaudio.rw",
+      "location": "Downtown Kigali, Quartier Commercial",
+      "category": "electronics",
+      "description": "Authorized importer of sound systems and smart audio accessories.",
+      "status": "Approved",
+      "createdAt": "2026-10-19T07:50:46.560Z",
+      "reviewedBy": "Ruth (System Owner)",
+      "reviewedAt": "2026-10-19T07:50:46.566Z"
+    }
+  ],
+  "supplierPayouts": [],
+  "settings": {
+    "companyName": "ContactReach Media Ltd",
+    "marketName": "ContactReach Market",
+    "slogan": "Discover Products. Pay Easily. Shop with Confidence.",
+    "phone": "0780022600",
+    "email": "contactreachmedialimited@gmail.com",
+    "address": "KG 622 St, Fair View Plaza, Kigali, Rwanda",
+    "receiverName": "Ruth",
+    "paymentNumber": "078002260",
+    "merchantCode": "078002",
+    "mtnUssdPattern": "*182*1*1*078002260*{AMOUNT}#",
+    "airtelUssdPattern": "*182*1*2*078002260*{AMOUNT}#",
+    "whatsAppNumber": "+250780022600",
+    "socials": {
+      "tiktok": "https://tiktok.com/@contactreachmedia",
+      "instagram": "https://instagram.com/@contactreachmedia",
+      "youtube": "https://youtube.com/@contactreachmedia",
+      "facebook": "https://facebook.com/@contactreachmedia"
+    },
+    "deliveryFeeKigali": 1500,
+    "deliveryFeeUpcountry": 3500,
+    "pickupAddress": "Fair View Plaza, KG 622 St, Kigali, Rwanda",
+    "kigaliAreas": [
+      {
+        "id": "gasabo",
+        "name": "Gasabo (Kimironko, Remera, Kacyiru, Gisozi, Kibagabaga)",
+        "fee": 1500,
+        "estimatedTime": "2 - 4 hours"
+      },
+      {
+        "id": "nyarugenge",
+        "name": "Nyarugenge (Downtown, Kiyovu, Nyamirambo, Muhima)",
+        "fee": 1500,
+        "estimatedTime": "2 - 4 hours"
+      },
+      {
+        "id": "kicukiro",
+        "name": "Kicukiro (Sonatubes, Gikondo, Kanombe, Niboye, Kagarama)",
+        "fee": 1500,
+        "estimatedTime": "2 - 4 hours"
+      },
+      {
+        "id": "express",
+        "name": "Kigali Express Direct Courier (Within 60-90 Mins)",
+        "fee": 3000,
+        "estimatedTime": "60 - 90 mins"
+      }
+    ],
+    "freeDeliveryThreshold": 50000,
+    "outsideKigaliNotice": "Locations outside the configured Kigali delivery areas: Additional delivery charges apply. Please contact our seller/support team on WhatsApp (+250 780 022 600) to confirm transport cost and delivery arrangements before completing your order."
+  }
+}

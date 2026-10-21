@@ -275,6 +275,58 @@ async function runTests() {
     assert.strictEqual(updatedProd.stock, 14, 'Stock should decrease from 15 to 14');
   });
 
+  // TEST 10B: Payment Confirmation with Pasted SMS Message and Screenshot Proof
+  await test('Customer can submit payment confirmation by pasting SMS message and admin can review proof', async () => {
+    // Create a new order to test pasted SMS confirmation flow
+    const orderRes = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: 'Kwizera Bosco',
+        customerPhone: '0780112233',
+        deliveryLocation: 'Kicukiro (Sonatubes)',
+        deliveryAddress: 'Sonatubes near Bank of Kigali',
+        items: [{ productId: createdProductId, quantity: 1 }],
+        paymentMethod: 'MTN Merchant Code'
+      })
+    });
+    assert.strictEqual(orderRes.status, 201);
+    const order = await orderRes.json();
+
+    const sampleSms = `Y'ello! You have transferred 36,500 RWF to ContactReach Market (078002) on 2026-10-21. TxId: 991827461. Fee: 100 RWF. New balance: 140,200 RWF.`;
+    const sampleScreenshot = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+    const confirmRes = await fetch(`${BASE_URL}/api/payments/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderNumber: order.orderNumber,
+        customerName: 'Kwizera Bosco',
+        paymentPhone: '0780112233',
+        paymentMethod: 'MTN Merchant Code',
+        amountPaid: 36500,
+        confirmationMessage: sampleSms,
+        screenshotUrl: sampleScreenshot
+      })
+    });
+    assert.strictEqual(confirmRes.status, 200, 'Confirmation submission with pasted SMS must succeed');
+    const confirmData = await confirmRes.json();
+    assert.strictEqual(confirmData.confirmation.confirmationMessage, sampleSms, 'Pasted SMS message must be preserved');
+    assert.strictEqual(confirmData.confirmation.transactionId, '991827461', 'TxId should be automatically extracted from SMS');
+    assert(confirmData.confirmation.screenshotUrl, 'Screenshot URL must be stored');
+
+    // Admin can retrieve the payment confirmation with proof details
+    const adminPaymentsRes = await fetch(`${BASE_URL}/api/admin/payments`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    assert.strictEqual(adminPaymentsRes.status, 200);
+    const paymentsList = await adminPaymentsRes.json();
+    const foundPm = paymentsList.find((p: any) => p.orderNumber === order.orderNumber);
+    assert(foundPm, 'Payment record should be listed for admin');
+    assert.strictEqual(foundPm.confirmationMessage, sampleSms, 'Admin must see customer pasted SMS message');
+    assert.strictEqual(foundPm.screenshotUrl, sampleScreenshot, 'Admin must see customer uploaded screenshot');
+  });
+
   // TEST 11: SEO and Structured Output Routes
   await test('Robots.txt and Sitemap.xml are dynamically served', async () => {
     const robotsRes = await fetch(`${BASE_URL}/robots.txt`);

@@ -58,7 +58,7 @@ async function runTests() {
     const unauthorizedAccount = await fetch(`${BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'attacker@evil.com', password: 'CRM@2026' })
+      body: JSON.stringify({ email: 'attacker@evil.com', password: 'SomeHackerPassword123!' })
     });
     assert.strictEqual(unauthorizedAccount.status, 401, 'Unauthorized emails should be rejected');
   });
@@ -71,7 +71,7 @@ async function runTests() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         email: 'contactreachmedialimited@gmail.com',
-        password: process.env.ADMIN_PASSWORD || 'CRM@2026'
+        password: process.env.ADMIN_PASSWORD || 'ContactReach@Staff2026!'
       })
     });
     assert.strictEqual(loginRes.status, 200, 'Admin login should succeed');
@@ -539,6 +539,215 @@ async function runTests() {
     const auditData = await auditRes.json();
     assert.strictEqual(auditData.confirmation.verificationStatus, 'Under Verification');
     assert.strictEqual(auditData.order.paymentStatus, 'Under Verification');
+  });
+
+  // TEST 17: Duplicate Order Prevention on Rapid Checkout
+  await test('Rapid re-submission of identical order returns original order without duplicating orders', async () => {
+    const payload = {
+      customerName: 'Eric Safari',
+      customerPhone: '0780998877',
+      deliveryLocation: 'Gasabo (Kacyiru)',
+      deliveryAddress: 'KG 544 St, Kacyiru',
+      items: [{ productId: createdProductId, quantity: 1 }],
+      paymentMethod: 'MTN Mobile Money'
+    };
+
+    const firstRes = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    assert.strictEqual(firstRes.status, 201);
+    const firstOrder = await firstRes.json();
+
+    // Submit identical order within 2 seconds
+    const secondRes = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    assert.strictEqual(secondRes.status, 200, 'Duplicate rapid submission must return 200 with existing order');
+    const secondOrder = await secondRes.json();
+    assert.strictEqual(secondOrder.orderNumber, firstOrder.orderNumber, 'Must return the exact same order reference');
+    assert.strictEqual(secondOrder.id, firstOrder.id);
+  });
+
+  // TEST 18: Supplier Payout Record Creation & Duplicate Disbursement Prevention
+  await test('Approved payments generate supplier payout records, and duplicate payouts are blocked', async () => {
+    // 1. Fetch current payouts
+    const payoutsRes = await fetch(`${BASE_URL}/api/admin/supplier-payouts`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    assert.strictEqual(payoutsRes.status, 200);
+    const payouts = await payoutsRes.json();
+    assert(Array.isArray(payouts), 'Supplier payouts should be an array');
+
+    // Find the payout record created for createdOrderNumber (approved in Test 10)
+    const orderPayout = payouts.find((p: any) => p.orderNumber === createdOrderNumber);
+    assert(orderPayout, `Supplier payout record for Order #${createdOrderNumber} must be present`);
+    assert.strictEqual(orderPayout.status, 'Pending');
+    assert.strictEqual(orderPayout.payoutAmount, 31500, 'Net supplier payout must be 31500 FRW');
+
+    // 2. Disburse the payout
+    const disburseRes = await fetch(`${BASE_URL}/api/admin/supplier-payouts/${orderPayout.id}/disburse`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ paymentReference: 'MOMO-PAY-776611' })
+    });
+    assert.strictEqual(disburseRes.status, 200);
+    const disbursed = await disburseRes.json();
+    assert.strictEqual(disbursed.payout.status, 'Paid');
+
+    // 3. Attempting duplicate disbursement MUST fail with 400
+    const duplicateDisburse = await fetch(`${BASE_URL}/api/admin/supplier-payouts/${orderPayout.id}/disburse`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ paymentReference: 'MOMO-PAY-DUPLICATE' })
+    });
+    assert.strictEqual(duplicateDisburse.status, 400, 'Duplicate payout disbursement must be blocked with 400');
+    const errData = await duplicateDisburse.json();
+    assert(errData.error?.includes('already been disbursed'), 'Error message must state payout was already disbursed');
+  });
+
+  // TEST 19: Website Maintenance Mode Controls
+  await test('Maintenance mode pauses public checkout with 503 while allowing admin access', async () => {
+    // 1. Admin enables maintenance mode
+    const enableMaintRes = await fetch(`${BASE_URL}/api/admin/settings`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({
+        isMaintenanceMode: true,
+        maintenanceMessage: 'ContactReach Market is currently under scheduled maintenance. We will return online shortly.'
+      })
+    });
+    assert.strictEqual(enableMaintRes.status, 200);
+
+    // 2. Public customer attempt to place order must be rejected with 503
+    const publicOrderRes = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: 'Public Buyer',
+        customerPhone: '0780223344',
+        deliveryLocation: 'Gasabo',
+        items: [{ productId: createdProductId, quantity: 1 }]
+      })
+    });
+    assert.strictEqual(publicOrderRes.status, 503, 'Public checkout during maintenance mode must return 503');
+    const maintErr = await publicOrderRes.json();
+    assert(maintErr.error?.includes('maintenance'), 'Error must contain maintenance message');
+
+    // 3. Admin with Bearer token can still place test orders during maintenance mode
+    const adminOrderRes = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({
+        customerName: 'Admin Test Shopper',
+        customerPhone: '0780991122',
+        deliveryLocation: 'Gasabo',
+        deliveryAddress: 'KG 12 St',
+        items: [{ productId: createdProductId, quantity: 1 }]
+      })
+    });
+    assert.strictEqual(adminOrderRes.status, 201, 'Admin must be able to test checkout during maintenance');
+
+    // 4. Restore normal mode
+    await fetch(`${BASE_URL}/api/admin/settings`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ isMaintenanceMode: false })
+    });
+  });
+
+  // TEST 20: Stock Restoration upon Order Cancellation
+  await test('Cancelling an order restores inventory stock and logs audit trail', async () => {
+    // Get product stock before
+    const prodResBefore = await fetch(`${BASE_URL}/api/products/${createdProductId}`);
+    const prodBefore = await prodResBefore.json();
+    const stockBefore = prodBefore.stock;
+
+    // Create an order
+    const orderRes = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: 'Keza Diane',
+        customerPhone: '0788998822',
+        deliveryLocation: 'Nyarugenge',
+        deliveryAddress: 'KN 20 St',
+        items: [{ productId: createdProductId, quantity: 2 }]
+      })
+    });
+    assert.strictEqual(orderRes.status, 201);
+    const ord = await orderRes.json();
+
+    // Mark paid & deduct stock
+    const payRes = await fetch(`${BASE_URL}/api/admin/orders/${ord.id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ status: 'Confirmed', paymentStatus: 'Paid' })
+    });
+    assert.strictEqual(payRes.status, 200);
+
+    const prodResAfterPay = await fetch(`${BASE_URL}/api/products/${createdProductId}`);
+    const prodAfterPay = await prodResAfterPay.json();
+    assert.strictEqual(prodAfterPay.stock, stockBefore - 2, 'Stock should decrease by 2 units');
+
+    // Cancel order -> stock must be restored
+    const cancelRes = await fetch(`${BASE_URL}/api/admin/orders/${ord.id}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ status: 'Cancelled', note: 'Customer requested cancellation.' })
+    });
+    assert.strictEqual(cancelRes.status, 200);
+
+    const prodResRestored = await fetch(`${BASE_URL}/api/products/${createdProductId}`);
+    const prodRestored = await prodResRestored.json();
+    assert.strictEqual(prodRestored.stock, stockBefore, 'Stock must be fully restored upon cancellation');
+  });
+
+  // TEST 21: USSD Payment Code Construction & URI Encoding
+  await test('USSD builder generates precise Rwandan codes and phone dialer tel: URI', async () => {
+    const { buildUssdCode, formatUssdTelUri } = await import('../src/utils/ussd.ts');
+
+    // MTN MoMo Direct: *182*1*1*078002260*AMOUNT#
+    const momoCode = buildUssdCode('MTN Mobile Money', 35000, '078002260');
+    assert.strictEqual(momoCode, '*182*1*1*078002260*35000#');
+    const momoUri = formatUssdTelUri(momoCode);
+    assert.strictEqual(momoUri, 'tel:*182*1*1*078002260*35000%23', '# must be encoded as %23');
+
+    // MTN MoMoPay Merchant: *182*8*1*078002*AMOUNT#
+    const merchantCode = buildUssdCode('MTN Merchant Code', 50000, undefined, '078002');
+    assert.strictEqual(merchantCode, '*182*8*1*078002*50000#');
+    const merchantUri = formatUssdTelUri(merchantCode);
+    assert.strictEqual(merchantUri, 'tel:*182*8*1*078002*50000%23');
+
+    // Airtel Money: *182*1*2*078002260*AMOUNT#
+    const airtelCode = buildUssdCode('Airtel Money', 20000, '078002260');
+    assert.strictEqual(airtelCode, '*182*1*2*078002260*20000#');
+    const airtelUri = formatUssdTelUri(airtelCode);
+    assert.strictEqual(airtelUri, 'tel:*182*1*2*078002260*20000%23');
   });
 
   console.log('\n====================================================');

@@ -937,10 +937,32 @@ app.get('/api/orders/:orderNumber/invoice', (req: Request, res: Response) => {
 
 // Payment Confirmation Submission
 app.post('/api/payments/confirm', (req: Request, res: Response) => {
-  const { orderNumber, customerName, paymentPhone, paymentMethod, amountPaid, transactionId, screenshotUrl } = req.body;
+  const { orderNumber, customerName, paymentPhone, paymentMethod, amountPaid, transactionId, screenshotUrl, confirmationMessage } = req.body;
 
-  if (!orderNumber || !paymentPhone || !transactionId || !amountPaid) {
-    return res.status(400).json({ error: 'Order reference, phone, amount paid, and transaction ID are required.' });
+  // Validation: Must have orderNumber, paymentPhone, amountPaid, AND at least one of (transactionId, confirmationMessage, screenshotUrl)
+  if (!orderNumber || !paymentPhone || !amountPaid) {
+    return res.status(400).json({ error: 'Order reference, phone, and amount paid are required.' });
+  }
+
+  const cleanMessage = confirmationMessage && typeof confirmationMessage === 'string' ? confirmationMessage.trim() : undefined;
+  let finalTxnId = transactionId && typeof transactionId === 'string' ? transactionId.trim() : '';
+
+  // If transactionId wasn't manually typed, try extracting from confirmationMessage or generate valid ID
+  if (!finalTxnId && cleanMessage) {
+    const txnMatch = cleanMessage.match(/(?:TxId|Transaction ID|Txn ID|Ref|Reference|ID|Id)[:\s]*([A-Za-z0-9_-]+)/i);
+    if (txnMatch && txnMatch[1]) {
+      finalTxnId = txnMatch[1].slice(0, 64);
+    } else {
+      finalTxnId = `SMS-${Date.now().toString().slice(-6)}`;
+    }
+  } else if (!finalTxnId && screenshotUrl) {
+    finalTxnId = `IMG-${Date.now().toString().slice(-6)}`;
+  }
+
+  if (!finalTxnId && !screenshotUrl && !cleanMessage) {
+    return res.status(400).json({
+      error: 'Please provide either your Transaction ID, upload a payment screenshot, or paste the payment confirmation message.'
+    });
   }
 
   const order = db.orders.find(o => o.orderNumber.toUpperCase() === orderNumber.trim().toUpperCase());
@@ -956,8 +978,9 @@ app.post('/api/payments/confirm', (req: Request, res: Response) => {
     paymentPhone: paymentPhone.trim(),
     paymentMethod: paymentMethod || order.paymentMethod,
     amountPaid: Number(amountPaid),
-    transactionId: transactionId.trim(),
-    screenshotUrl,
+    transactionId: finalTxnId || `TXN-${Date.now().toString().slice(-6)}`,
+    screenshotUrl: screenshotUrl || undefined,
+    confirmationMessage: cleanMessage || undefined,
     submittedAt: new Date().toISOString(),
     verificationStatus: 'Pending Review'
   };
@@ -968,7 +991,7 @@ app.post('/api/payments/confirm', (req: Request, res: Response) => {
     status: order.status,
     paymentStatus: 'Pending Verification',
     timestamp: new Date().toISOString(),
-    note: `Payment confirmation submitted. Txn ID: ${transactionId}, Phone: ${paymentPhone}. Pending verification.`
+    note: `Payment confirmation submitted. Txn ID: ${confirmation.transactionId}, Phone: ${paymentPhone}${cleanMessage ? ' (SMS pasted)' : ''}${screenshotUrl ? ' (Screenshot attached)' : ''}. Pending verification.`
   });
 
   db.paymentConfirmations.unshift(confirmation);

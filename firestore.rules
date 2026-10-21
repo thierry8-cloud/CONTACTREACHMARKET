@@ -126,7 +126,7 @@ service cloud.firestore {
     // Payment Confirmations
     match /paymentConfirmations/{confirmationId} {
       allow get, list: if isVerifiedAdmin();
-      allow create: if isValidId(confirmationId) && isValidPayment(incoming()) && (incoming().verificationStatus == 'Pending Review' || incoming().status == 'Pending Review');
+      allow create: if isValidId(confirmationId) && isValidPayment(incoming()) && (incoming().verificationStatus in ['Pending Review', 'Pending Verification', 'Payment Submitted', 'Under Verification'] || incoming().status in ['Pending Review', 'Pending Verification', 'Payment Submitted', 'Under Verification']);
       allow update, delete: if isVerifiedAdmin() && isValidId(confirmationId);
     }
 

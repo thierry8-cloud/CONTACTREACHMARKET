@@ -23,6 +23,10 @@ import {
   getSettingsFromFirestore,
   saveSettingsToFirestore,
   saveCustomerToFirestore,
+  updateOrderInFirestore,
+  updatePaymentInFirestore,
+  saveSupplierPayoutToFirestore,
+  updateSupplierApplicationInFirestore,
   logoutUser
 } from './firebase.ts';
 
@@ -761,9 +765,7 @@ export const api = {
 
   async adminLogin(email: string, password: string): Promise<{ token: string; admin: any }> {
     const cleanEmail = email.trim();
-    const normalizedEmail = cleanEmail.toLowerCase();
 
-    // 1. Attempt API server authentication first
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -777,48 +779,21 @@ export const api = {
         return { token: parsed.json.token, admin: parsed.json.admin };
       }
 
-      // If backend explicitly rejected the credentials with a JSON error, throw that error
       if (parsed.isJson && parsed.json?.error) {
         throw new Error(parsed.json.error);
       }
     } catch (fetchErr: any) {
-      // Re-throw genuine credential rejection errors from server
       if (fetchErr.message && !fetchErr.message.includes('API endpoint') && !fetchErr.message.includes('fetch')) {
         throw fetchErr;
       }
     }
 
-    // 2. Static CDN / Decoupled Hosting Fallback:
-    // If /api/auth/login returned HTML (e.g. Vercel/Netlify index.html fallback) or server is unreachable,
-    // authenticate against authorized admin accounts with designated security password
-    const expectedOwnerPassword = 'CRM@2026';
-    const isOwner = normalizedEmail === 'contactreachmedialimited@gmail.com';
-    const matchedAdmin = fallbackAdminUsers.find(u => u.email.toLowerCase() === normalizedEmail && u.active);
-
-    if ((isOwner || matchedAdmin) && password === expectedOwnerPassword) {
-      const adminUser: AdminUser = matchedAdmin || {
-        id: 'adm-owner-ruth',
-        name: 'Ruth (System Owner)',
-        email: normalizedEmail,
-        role: 'owner',
-        active: true,
-        phone: '0780022600',
-        lastLogin: new Date().toISOString()
-      };
-      adminUser.lastLogin = new Date().toISOString();
-      const sessionToken = `crm_static_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
-      setAdminToken(sessionToken, adminUser);
-      return { token: sessionToken, admin: adminUser };
-    }
-
     throw new Error('Invalid administrator credentials. Please check your email and password.');
   },
 
-  async adminFirebaseLogin(user: { email: string; displayName?: string | null; uid?: string }): Promise<{ token: string; admin: any }> {
+  async adminFirebaseLogin(user: { email: string; displayName?: string | null; uid?: string; idToken?: string }): Promise<{ token: string; admin: any }> {
     const cleanEmail = (user.email || '').trim();
-    const normalizedEmail = cleanEmail.toLowerCase();
 
-    // 1. Attempt API server authentication
     try {
       const res = await fetch('/api/auth/firebase-login', {
         method: 'POST',
@@ -826,7 +801,8 @@ export const api = {
         body: JSON.stringify({
           email: cleanEmail,
           displayName: user.displayName,
-          uid: user.uid
+          uid: user.uid,
+          idToken: user.idToken
         })
       });
       const parsed = await safeParseResponse<{ token: string; admin: any; error?: string }>(res);
@@ -845,28 +821,6 @@ export const api = {
       }
     }
 
-    // 2. Direct Firebase Auth verification
-    const matchedAdmin = fallbackAdminUsers.find(u => u.email.toLowerCase() === normalizedEmail && u.active);
-    const isAuthorized = normalizedEmail === 'contactreachmedialimited@gmail.com' ||
-                         Boolean(matchedAdmin) ||
-                         normalizedEmail.endsWith('@contactreachmedia.rw');
-
-    if (isAuthorized) {
-      const adminUser: AdminUser = matchedAdmin || {
-        id: user.uid || 'adm-owner-ruth',
-        name: user.displayName || 'Authorized Administrator',
-        email: normalizedEmail,
-        role: normalizedEmail === 'contactreachmedialimited@gmail.com' ? 'owner' : 'administrator',
-        active: true,
-        phone: '0780022600',
-        lastLogin: new Date().toISOString()
-      };
-      adminUser.lastLogin = new Date().toISOString();
-      const sessionToken = `crm_fb_${Date.now()}_${Math.random().toString(36).slice(2, 12)}`;
-      setAdminToken(sessionToken, adminUser);
-      return { token: sessionToken, admin: adminUser };
-    }
-
     throw new Error(`Access denied. Google account (${cleanEmail}) is not an authorized ContactReach Market administrator.`);
   },
 
@@ -874,26 +828,18 @@ export const api = {
     const token = getAdminToken();
     if (!token) return false;
 
-    // Direct client session check
-    if (token.startsWith('crm_static_') || token.startsWith('crm_fb_')) {
-      const stored = getStoredAdminUser();
-      return Boolean(stored && stored.active);
-    }
-
     try {
       const res = await fetch('/api/auth/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
       const parsed = await safeParseResponse<any>(res);
-      if (res.ok && parsed.isJson && parsed.json?.admin) {
+      if (res.ok && parsed.isJson && (parsed.json?.id || parsed.json?.email || parsed.json?.role)) {
         return true;
       }
-      if (!parsed.isJson) {
-        const stored = getStoredAdminUser();
-        return Boolean(stored && stored.active);
-      }
+      removeAdminToken();
       return false;
     } catch {
+      // In case of transient offline, keep existing session if stored
       const stored = getStoredAdminUser();
       return Boolean(stored && stored.active);
     }
@@ -901,7 +847,7 @@ export const api = {
 
   async adminLogout(): Promise<void> {
     const token = getAdminToken();
-    if (token && !token.startsWith('crm_static_') && !token.startsWith('crm_fb_')) {
+    if (token) {
       try {
         await fetch('/api/auth/logout', {
           method: 'POST',
@@ -910,6 +856,9 @@ export const api = {
       } catch {}
     }
     removeAdminToken();
+    try {
+      await logoutUser();
+    } catch {}
   },
 
   async adminResetPasswordRequest(email: string): Promise<string> {
@@ -1001,6 +950,9 @@ export const api = {
       });
       const parsed = await safeParseResponse<Order>(res);
       if (res.ok && parsed.isJson && parsed.json) {
+        try {
+          await updateOrderInFirestore(parsed.json);
+        } catch {}
         return parsed.json;
       }
       if (parsed.isJson && (parsed.json as any)?.error) {
@@ -1036,6 +988,16 @@ export const api = {
       });
       const parsed = await safeParseResponse<any>(res);
       if (res.ok && parsed.isJson && parsed.json) {
+        if (parsed.json.order) {
+          try {
+            await updateOrderInFirestore(parsed.json.order);
+          } catch {}
+        }
+        if (parsed.json.confirmation) {
+          try {
+            await updatePaymentInFirestore(parsed.json.confirmation);
+          } catch {}
+        }
         return parsed.json;
       }
       if (parsed.isJson && parsed.json?.error) {
@@ -1725,9 +1687,21 @@ export const api = {
       });
       const parsed = await safeParseResponse<any>(res);
       if (res.ok && parsed.isJson && parsed.json) {
+        if (parsed.json.payout) {
+          try {
+            await saveSupplierPayoutToFirestore(parsed.json.payout);
+          } catch {}
+        }
         return parsed.json;
       }
-    } catch {}
+      if (parsed.isJson && parsed.json?.error) {
+        throw new Error(parsed.json.error);
+      }
+    } catch (err: any) {
+      if (err.message && !err.message.includes('API endpoint') && !err.message.includes('fetch')) {
+        throw err;
+      }
+    }
     return { message: 'Payout marked as successfully disbursed' };
   },
 
@@ -1738,6 +1712,7 @@ export const api = {
     uid: string;
     photoURL?: string | null;
     phoneNumber?: string | null;
+    idToken?: string;
   }): Promise<{ user: CustomerUser; token: string }> {
     const cleanEmail = (googleUser.email || '').trim().toLowerCase();
 
@@ -1751,7 +1726,8 @@ export const api = {
           displayName: googleUser.displayName,
           uid: googleUser.uid,
           photoURL: googleUser.photoURL,
-          phoneNumber: googleUser.phoneNumber
+          phoneNumber: googleUser.phoneNumber,
+          idToken: googleUser.idToken
         })
       });
       const parsed = await safeParseResponse<{ user: CustomerUser; token: string; error?: string }>(res);

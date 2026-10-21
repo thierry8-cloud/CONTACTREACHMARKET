@@ -32,10 +32,12 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
       if (!fbUser.email) {
         throw new Error('Google account did not provide an email address.');
       }
+      const idToken = await fbUser.getIdToken();
       const res = await api.adminFirebaseLogin({
         email: fbUser.email,
         displayName: fbUser.displayName,
-        uid: fbUser.uid
+        uid: fbUser.uid,
+        idToken
       });
       onLoginSuccess(res.admin);
       onClose();

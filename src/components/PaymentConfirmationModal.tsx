@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { Order, PaymentMethod, PaymentConfirmation } from '../types.ts';
 import { Language, translations } from '../translations.ts';
+import { api } from '../services/api.ts';
 import { buildUssdCode, formatUssdTelUri, autoTriggerUssd } from '../utils/ussd.ts';
 
 interface PaymentConfirmationModalProps {
@@ -139,27 +140,17 @@ export const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> =
 
     setLoading(true);
     try {
-      const response = await fetch('/api/payments/confirm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderNumber: orderNumber.trim(),
-          customerName: customerName.trim(),
-          paymentPhone: paymentPhone.trim(),
-          paymentMethod,
-          amountPaid: Number(amountPaid),
-          transactionId: transactionId.trim() || (detectedTxn || `SMS-${Date.now().toString().slice(-6)}`),
-          screenshotUrl: screenshotData || undefined,
-          confirmationMessage: confirmationMessage.trim() || undefined
-        })
+      const data = await api.submitPaymentConfirmation({
+        orderNumber: orderNumber.trim(),
+        customerName: customerName.trim(),
+        paymentPhone: paymentPhone.trim(),
+        paymentMethod,
+        amountPaid: Number(amountPaid),
+        transactionId: transactionId.trim() || (detectedTxn || `SMS-${Date.now().toString().slice(-6)}`),
+        screenshotUrl: screenshotData || undefined,
+        confirmationMessage: confirmationMessage.trim() || undefined
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to submit payment confirmation.');
-      }
-
-      const data = await response.json();
       setSuccessResult(data);
       onConfirmationSuccess(data.confirmation, data.order);
     } catch (err: any) {

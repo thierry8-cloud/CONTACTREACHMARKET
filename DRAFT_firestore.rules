@@ -126,7 +126,7 @@ service cloud.firestore {
     // Payment Confirmations
     match /paymentConfirmations/{confirmationId} {
       allow get, list: if isVerifiedAdmin();
-      allow create: if isValidId(confirmationId) && isValidPayment(incoming()) && incoming().verificationStatus == 'Pending Review';
+      allow create: if isValidId(confirmationId) && isValidPayment(incoming()) && (incoming().verificationStatus in ['Pending Review', 'Pending Verification', 'Payment Submitted', 'Under Verification'] || incoming().status in ['Pending Review', 'Pending Verification', 'Payment Submitted', 'Under Verification']);
       allow update, delete: if isVerifiedAdmin() && isValidId(confirmationId);
     }
 
@@ -166,6 +166,14 @@ service cloud.firestore {
     // Audit Logs
     match /auditLogs/{logId} {
       allow read, write: if isVerifiedAdmin() && isValidId(logId);
+    }
+
+    // Customers / Buyers
+    match /customers/{customerId} {
+      allow get: if true;
+      allow list: if isVerifiedAdmin();
+      allow create, update: if isValidId(customerId);
+      allow delete: if isVerifiedAdmin() && isValidId(customerId);
     }
 
     // Users

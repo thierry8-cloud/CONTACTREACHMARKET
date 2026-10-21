@@ -170,6 +170,14 @@ const defaultAdminUsers: AdminUser[] = [
     phone: '0792412177'
   },
   {
+    id: 'adm-ops-thierry',
+    name: 'Thierry Maniriho (Administrator)',
+    email: 'manirihothierry11@gmail.com',
+    role: 'administrator',
+    active: true,
+    phone: '0792412177'
+  },
+  {
     id: 'adm-prod-mgr',
     name: 'Eric Kwizera (Catalog & Inventory)',
     email: 'products@contactreachmedia.rw',
@@ -283,7 +291,14 @@ function loadDbFromDisk() {
       if (parsed.inventoryLogs && Array.isArray(parsed.inventoryLogs)) db.inventoryLogs = parsed.inventoryLogs;
       if (parsed.auditLogs && Array.isArray(parsed.auditLogs)) db.auditLogs = parsed.auditLogs;
       if (parsed.customers && Array.isArray(parsed.customers)) db.customers = parsed.customers;
-      if (parsed.adminUsers && Array.isArray(parsed.adminUsers)) db.adminUsers = parsed.adminUsers;
+      if (parsed.adminUsers && Array.isArray(parsed.adminUsers)) {
+        db.adminUsers = parsed.adminUsers;
+        defaultAdminUsers.forEach(defAdm => {
+          if (!db.adminUsers.some(a => a.email.toLowerCase() === defAdm.email.toLowerCase())) {
+            db.adminUsers.push(defAdm);
+          }
+        });
+      }
       if (parsed.reviews && Array.isArray(parsed.reviews)) db.reviews = parsed.reviews;
       if (parsed.supplierApplications && Array.isArray(parsed.supplierApplications)) db.supplierApplications = parsed.supplierApplications;
       if (parsed.supplierPayouts && Array.isArray(parsed.supplierPayouts)) db.supplierPayouts = parsed.supplierPayouts;
@@ -682,6 +697,24 @@ app.post('/api/orders', (req: Request, res: Response) => {
     paymentMethod,
     couponCode
   } = req.body;
+
+  // Block public checkout if Maintenance Mode is active (except for authenticated admins)
+  if (db.settings.isMaintenanceMode) {
+    const authHeader = req.headers.authorization;
+    let isAdmin = false;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const bearer = authHeader.split(' ')[1];
+      const session = db.adminTokens.get(bearer);
+      if (session && session.expiresAt > Date.now()) {
+        isAdmin = true;
+      }
+    }
+    if (!isAdmin) {
+      return res.status(503).json({
+        error: db.settings.maintenanceMessage || 'ContactReach Market is currently in scheduled maintenance. New orders are temporarily paused. We will be back online shortly!'
+      });
+    }
+  }
 
   if (!customerName || !customerPhone || !items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Customer name, phone number, and items are required.' });
@@ -2653,16 +2686,66 @@ app.get('/api/admin/audit-logs', requireAdminAuth, requireRole(['owner', 'admini
 });
 
 // -------------------------------------------------------------
-// ADMIN SETTINGS UPDATE
+// ADMIN SETTINGS UPDATE & MAINTENANCE MODE
 // -------------------------------------------------------------
 
 app.put('/api/admin/settings', requireAdminAuth, requireRole(['owner', 'administrator']), (req: Request, res: Response) => {
   const admin = (req as any).adminUser;
+  const previousMaintenance = db.settings.isMaintenanceMode;
   db.settings = { ...db.settings, ...req.body };
-  logAudit(admin, 'SETTINGS_UPDATED', 'Updated marketplace configuration and receiver details');
+  
+  if (req.body.isMaintenanceMode !== undefined && req.body.isMaintenanceMode !== previousMaintenance) {
+    db.settings.maintenanceUpdatedAt = new Date().toISOString();
+    logAudit(
+      admin,
+      req.body.isMaintenanceMode ? 'MAINTENANCE_MODE_ENABLED' : 'MAINTENANCE_MODE_DISABLED',
+      `Maintenance Mode was turned ${req.body.isMaintenanceMode ? 'ON' : 'OFF'} by ${admin.name}. Public visitors ${req.body.isMaintenanceMode ? 'now see "We’ll Be Back Soon" screen' : 'can now access and browse marketplace normally'}.`,
+      'settings',
+      'global'
+    );
+  } else {
+    logAudit(admin, 'SETTINGS_UPDATED', 'Updated marketplace configuration and receiver details');
+  }
+
   saveDbToDisk();
   saveToFirestoreAsync('settings', 'global', db.settings);
   res.json(db.settings);
+});
+
+// Dedicated fast Maintenance Mode toggle endpoint
+app.post('/api/admin/maintenance-toggle', requireAdminAuth, requireRole(['owner', 'administrator']), (req: Request, res: Response) => {
+  const admin = (req as any).adminUser;
+  const { isMaintenanceMode, maintenanceTitle, maintenanceMessage, maintenanceEstimatedTime } = req.body;
+  
+  if (typeof isMaintenanceMode !== 'boolean') {
+    return res.status(400).json({ error: 'isMaintenanceMode (boolean) is required.' });
+  }
+
+  const previousState = Boolean(db.settings.isMaintenanceMode);
+  db.settings.isMaintenanceMode = isMaintenanceMode;
+  if (maintenanceTitle !== undefined) db.settings.maintenanceTitle = maintenanceTitle;
+  if (maintenanceMessage !== undefined) db.settings.maintenanceMessage = maintenanceMessage;
+  if (maintenanceEstimatedTime !== undefined) db.settings.maintenanceEstimatedTime = maintenanceEstimatedTime;
+  db.settings.maintenanceUpdatedAt = new Date().toISOString();
+
+  logAudit(
+    admin,
+    isMaintenanceMode ? 'MAINTENANCE_MODE_ENABLED' : 'MAINTENANCE_MODE_DISABLED',
+    `Maintenance Mode toggled ${isMaintenanceMode ? 'ON' : 'OFF'} by ${admin.name} (Previous: ${previousState ? 'ON' : 'OFF'}). Headline: "${db.settings.maintenanceTitle || "We'll Be Back Soon"}".`,
+    'settings',
+    'global'
+  );
+
+  saveDbToDisk();
+  saveToFirestoreAsync('settings', 'global', db.settings);
+
+  res.json({
+    success: true,
+    message: isMaintenanceMode
+      ? 'Maintenance Mode is now ON. Public visitors see the "We’ll Be Back Soon" screen.'
+      : 'Maintenance Mode is now OFF. Public storefront is live for all visitors.',
+    settings: db.settings
+  });
 });
 
 // -------------------------------------------------------------

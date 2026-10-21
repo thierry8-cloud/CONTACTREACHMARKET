@@ -154,6 +154,14 @@ const defaultCoupons: Coupon[] = [
 // Default Initial Admin Users
 const defaultAdminUsers: AdminUser[] = [
   {
+    id: 'adm-owner-thierry',
+    name: 'Thierry Maniriho (Platform Owner)',
+    email: 'manirihothierry6@gmail.com',
+    role: 'owner',
+    active: true,
+    phone: '0792412177'
+  },
+  {
     id: 'adm-owner-ruth',
     name: 'Ruth (System Owner)',
     email: 'contactreachmedialimited@gmail.com',
@@ -359,42 +367,17 @@ function sanitizeForFirestore(data: any): any {
   return clone;
 }
 
-// Fire-and-forget safe async writer to Cloud Firestore for authorized public documents
+// Fire-and-forget safe async writer to Cloud Firestore with error handling
 function saveToFirestoreAsync(collectionName: string, docId: string, data: any) {
-  if (!firestoreDb || !data) return;
-  if (!PUBLIC_WRITABLE_COLLECTIONS.has(collectionName)) {
-    return;
-  }
-
-  // Pre-validate that public writes strictly comply with Firestore security rules
-  // to avoid sending unauthorized writes that fail with permission-denied
-  if (collectionName === 'orders' && (data.status !== 'New' || data.paymentStatus !== 'Pending Payment')) {
-    return;
-  }
-  if (collectionName === 'supplierApplications' && data.status !== 'Pending') {
-    return;
-  }
-  if (collectionName === 'messages' && data.status !== 'unread') {
-    return;
-  }
-  if (collectionName === 'customerProblems' && data.status !== 'New') {
-    return;
-  }
-  if (
-    collectionName === 'paymentConfirmations' &&
-    data.verificationStatus !== 'Pending Review' &&
-    data.status !== 'Pending Review'
-  ) {
-    return;
-  }
+  if (!firestoreDb || !data || !docId) return;
 
   const cleanData = sanitizeForFirestore(data);
-  firestoreSetDoc(firestoreDoc(firestoreDb, collectionName, docId), cleanData).catch(err => {
+  firestoreSetDoc(firestoreDoc(firestoreDb, collectionName, docId), cleanData, { merge: true }).catch(err => {
     console.warn(`[Firebase] Async write notice (${collectionName}/${docId}):`, err.message || err);
   });
 }
 
-// Background startup sync with Cloud Firestore (read-only verification to prevent unauthorized writes)
+// Background startup sync with Cloud Firestore: ensures Firestore is authoritative
 async function syncWithFirestore() {
   if (!firestoreDb) return;
   try {
@@ -462,6 +445,59 @@ async function syncWithFirestore() {
       }
     }
 
+    // 7. Sync orders if present in Firestore (prevent data loss across container sleep/disk wipe)
+    const orderCol = firestoreCollection(firestoreDb, 'orders');
+    const orderSnap = await firestoreGetDocs(orderCol);
+    if (orderSnap.size > 0) {
+      const fsOrders: Order[] = [];
+      orderSnap.forEach(d => fsOrders.push({ ...(d.data() as Order), id: d.id }));
+      if (fsOrders.length > 0) {
+        const existingOrderIds = new Set(db.orders.map(o => o.id));
+        const existingOrderNums = new Set(db.orders.map(o => o.orderNumber.toUpperCase()));
+        const newOrders = fsOrders.filter(o => !existingOrderIds.has(o.id) && !existingOrderNums.has(o.orderNumber?.toUpperCase()));
+        db.orders = [...db.orders, ...newOrders];
+      }
+    }
+
+    // 8. Sync payment confirmations from Firestore
+    const pmCol = firestoreCollection(firestoreDb, 'paymentConfirmations');
+    const pmSnap = await firestoreGetDocs(pmCol);
+    if (pmSnap.size > 0) {
+      const fsPms: PaymentConfirmation[] = [];
+      pmSnap.forEach(d => fsPms.push({ ...(d.data() as PaymentConfirmation), id: d.id }));
+      if (fsPms.length > 0) {
+        const existingPmIds = new Set(db.paymentConfirmations.map(c => c.id));
+        const newPms = fsPms.filter(c => !existingPmIds.has(c.id));
+        db.paymentConfirmations = [...db.paymentConfirmations, ...newPms];
+      }
+    }
+
+    // 9. Sync supplier applications from Firestore
+    const suppCol = firestoreCollection(firestoreDb, 'supplierApplications');
+    const suppSnap = await firestoreGetDocs(suppCol);
+    if (suppSnap.size > 0) {
+      const fsApps: SupplierApplication[] = [];
+      suppSnap.forEach(d => fsApps.push({ ...(d.data() as SupplierApplication), id: d.id }));
+      if (fsApps.length > 0) {
+        const existingAppIds = new Set(db.supplierApplications.map(a => a.id));
+        const newApps = fsApps.filter(a => !existingAppIds.has(a.id));
+        db.supplierApplications = [...db.supplierApplications, ...newApps];
+      }
+    }
+
+    // 10. Sync supplier payouts from Firestore
+    const payoutCol = firestoreCollection(firestoreDb, 'supplierPayouts');
+    const payoutSnap = await firestoreGetDocs(payoutCol);
+    if (payoutSnap.size > 0) {
+      const fsPayouts: SupplierPayoutRecord[] = [];
+      payoutSnap.forEach(d => fsPayouts.push({ ...(d.data() as SupplierPayoutRecord), id: d.id }));
+      if (fsPayouts.length > 0) {
+        const existingPayoutIds = new Set(db.supplierPayouts.map(p => p.id));
+        const newPayouts = fsPayouts.filter(p => !existingPayoutIds.has(p.id));
+        db.supplierPayouts = [...db.supplierPayouts, ...newPayouts];
+      }
+    }
+
     console.log('[Firebase] Cloud Firestore synchronization verified successfully.');
   } catch (err) {
     console.warn('[Firebase] Firestore synchronization notice:', err);
@@ -473,7 +509,7 @@ app.use(express.json({ limit: '20mb' }));
 
 // Auth & Permissions Config
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'contactreachmedialimited@gmail.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'CRM@2026';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || (process.env.NODE_ENV === 'production' ? '' : 'ContactReach@Staff2026!');
 
 // Middleware to authenticate admin token
 function requireAdminAuth(req: Request, res: Response, next: NextFunction) {
@@ -718,6 +754,20 @@ app.post('/api/orders', (req: Request, res: Response) => {
 
   if (!customerName || !customerPhone || !items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ error: 'Customer name, phone number, and items are required.' });
+  }
+
+  // Idempotency / Duplicate submission protection (returns existing order if double-clicked within 15s)
+  const cleanCustomerPhone = customerPhone.replace(/\D/g, '');
+  const fifteenSecondsAgo = Date.now() - 15000;
+  const recentDuplicate = db.orders.find(o =>
+    o.customerPhone.replace(/\D/g, '') === cleanCustomerPhone &&
+    new Date(o.createdAt).getTime() > fifteenSecondsAgo &&
+    o.items.length === items.length &&
+    o.items.every((it, idx) => it.productId === items[idx]?.productId && it.quantity === Math.max(1, parseInt(items[idx]?.quantity, 10) || 1))
+  );
+
+  if (recentDuplicate) {
+    return res.status(200).json(recentDuplicate);
   }
 
   // Validate items & stock
@@ -1374,22 +1424,52 @@ function requireBuyerAuth(req: Request, res: Response, next: NextFunction) {
 }
 
 // 1. Exclusive Buyer Google Sign-In Endpoint
-app.post('/api/buyers/google-login', (req: Request, res: Response) => {
-  const { email, displayName, uid, photoURL, phoneNumber } = req.body;
-  if (!email && !uid) {
-    return res.status(400).json({ error: 'Google account details (email or UID) are required.' });
+app.post('/api/buyers/google-login', async (req: Request, res: Response) => {
+  const { email, displayName, uid, photoURL, phoneNumber, idToken } = req.body;
+  if (!email && !uid && !idToken) {
+    return res.status(400).json({ error: 'Google account details (email, UID, or ID token) are required.' });
   }
 
-  const normalizedEmail = (email || '').trim().toLowerCase();
+  let normalizedEmail = (email || '').trim().toLowerCase();
+  let verifiedUid = uid;
+  let verifiedName = displayName;
+  let verifiedPhoto = photoURL;
+
+  // Cryptographic Google ID Token Verification
+  if (idToken && typeof idToken === 'string') {
+    try {
+      const fbConfigPath = path.resolve('firebase-applet-config.json');
+      if (fs.existsSync(fbConfigPath)) {
+        const config = JSON.parse(fs.readFileSync(fbConfigPath, 'utf-8'));
+        const verifyRes = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${config.apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+        if (verifyRes.ok) {
+          const verifyData = await verifyRes.json();
+          if (verifyData.users && verifyData.users.length > 0) {
+            const gUser = verifyData.users[0];
+            if (gUser.email) normalizedEmail = gUser.email.toLowerCase().trim();
+            if (gUser.localId) verifiedUid = gUser.localId;
+            if (gUser.displayName) verifiedName = gUser.displayName;
+            if (gUser.photoUrl) verifiedPhoto = gUser.photoUrl;
+          }
+        }
+      }
+    } catch (tokenErr) {
+      console.warn('[Buyer Auth] Google ID token verification lookup notice:', tokenErr);
+    }
+  }
 
   // Match buyer by email, googleUid, or id
   let buyer = db.customers.find(c =>
     (normalizedEmail && c.email && c.email.toLowerCase() === normalizedEmail) ||
-    (c.googleUid && c.googleUid === uid) ||
-    (c.id === `cust-g-${uid}`)
+    (verifiedUid && c.googleUid && c.googleUid === verifiedUid) ||
+    (verifiedUid && c.id === `cust-g-${verifiedUid}`)
   );
 
-  const buyerName = displayName?.trim() || (normalizedEmail ? normalizedEmail.split('@')[0] : 'Valued Buyer');
+  const buyerName = verifiedName?.trim() || (normalizedEmail ? normalizedEmail.split('@')[0] : 'Valued Buyer');
 
   if (buyer) {
     if (buyer.status === 'Suspended') {
@@ -1544,21 +1624,28 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
   }
 
   // Strict credentials verification: Owner account with designated password
-  const expectedOwnerPassword = process.env.ADMIN_PASSWORD || 'CRM@2026';
-  const isOwnerEmail = normalizedEmail === 'contactreachmedialimited@gmail.com' || normalizedEmail === ADMIN_EMAIL.toLowerCase();
-  const passwordMatches = isOwnerEmail && password === expectedOwnerPassword;
+  if (!ADMIN_PASSWORD) {
+    return res.status(403).json({
+      error: 'Password-based administrative login is disabled in production. Please sign in using verified Google Firebase Authentication.'
+    });
+  }
+
+  const isOwnerEmail = normalizedEmail === 'manirihothierry6@gmail.com' ||
+                       normalizedEmail === 'contactreachmedialimited@gmail.com' ||
+                       normalizedEmail === ADMIN_EMAIL.toLowerCase();
 
   const user = db.adminUsers.find(u => u.email.toLowerCase() === normalizedEmail && u.active);
+  const passwordMatches = (isOwnerEmail || user) && password === ADMIN_PASSWORD;
 
-  if (passwordMatches || (user && password === expectedOwnerPassword)) {
+  if (passwordMatches) {
     // Reset rate-limiting on success
     loginAttempts.delete(normalizedEmail);
 
     const token = crypto.randomBytes(32).toString('hex');
     const role: AdminRole = user ? user.role : 'owner';
     const adminUser: AdminUser = user || {
-      id: 'adm-owner-ruth',
-      name: 'Ruth (System Owner)',
+      id: 'adm-owner-thierry',
+      name: 'Thierry Maniriho (Platform Owner)',
       email: normalizedEmail,
       role: 'owner',
       active: true,
@@ -1593,25 +1680,62 @@ app.post('/api/auth/login', (req: Request, res: Response) => {
   return res.status(401).json({ error: 'Invalid administrator credentials.' });
 });
 
-// Firebase Authentication Login Endpoint (Strict Email Verification)
-app.post('/api/auth/firebase-login', (req: Request, res: Response) => {
-  const { email, displayName, uid } = req.body;
-  if (!email) {
-    return res.status(400).json({ error: 'Email is required from Firebase authentication.' });
+// Firebase Authentication Login Endpoint (Strict ID Token & Email Verification)
+app.post('/api/auth/firebase-login', async (req: Request, res: Response) => {
+  const { email, displayName, uid, idToken } = req.body;
+  if (!email && !idToken) {
+    return res.status(400).json({ error: 'Email or ID token is required from Firebase authentication.' });
   }
 
-  const normalizedEmail = email.trim().toLowerCase();
-  const isOwner = normalizedEmail === 'contactreachmedialimited@gmail.com' || normalizedEmail === ADMIN_EMAIL.toLowerCase();
-  const user = db.adminUsers.find(u => u.email.toLowerCase() === normalizedEmail && u.active);
+  let verifiedEmail = (email || '').trim().toLowerCase();
+  let verifiedUid = uid;
+  let verifiedDisplayName = displayName;
 
-  if (isOwner || user) {
+  // Cryptographic Google ID Token Verification via Identity Toolkit
+  if (idToken && typeof idToken === 'string') {
+    try {
+      const fbConfigPath = path.resolve('firebase-applet-config.json');
+      if (fs.existsSync(fbConfigPath)) {
+        const config = JSON.parse(fs.readFileSync(fbConfigPath, 'utf-8'));
+        const verifyRes = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${config.apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken })
+        });
+        if (verifyRes.ok) {
+          const verifyData = await verifyRes.json();
+          if (verifyData.users && verifyData.users.length > 0) {
+            const googleUser = verifyData.users[0];
+            if (googleUser.email) verifiedEmail = googleUser.email.toLowerCase().trim();
+            if (googleUser.localId) verifiedUid = googleUser.localId;
+            if (googleUser.displayName) verifiedDisplayName = googleUser.displayName;
+          }
+        } else {
+          return res.status(401).json({ error: 'Invalid or expired Firebase ID token.' });
+        }
+      }
+    } catch (tokenErr) {
+      console.warn('[Firebase Auth] Verification lookup notice:', tokenErr);
+    }
+  }
+
+  const isOwner = verifiedEmail === 'manirihothierry6@gmail.com' ||
+                  verifiedEmail === 'contactreachmedialimited@gmail.com' ||
+                  verifiedEmail === 'inzozilink@gmail.com' ||
+                  verifiedEmail === 'manirihothierry11@gmail.com' ||
+                  verifiedEmail === ADMIN_EMAIL.toLowerCase();
+
+  const user = db.adminUsers.find(u => u.email.toLowerCase() === verifiedEmail && u.active);
+  const isDomainAdmin = verifiedEmail.endsWith('@contactreachmedia.rw');
+
+  if (isOwner || user || isDomainAdmin) {
     const token = crypto.randomBytes(32).toString('hex');
-    const role: AdminRole = user ? user.role : 'owner';
+    const role: AdminRole = isOwner ? 'owner' : (user ? user.role : 'administrator');
     const adminUser: AdminUser = user || {
-      id: uid ? `adm-fb-${uid}` : 'adm-owner-ruth',
-      name: displayName || 'Ruth (System Owner)',
-      email: normalizedEmail,
-      role: 'owner',
+      id: verifiedUid ? `adm-fb-${verifiedUid}` : 'adm-owner-thierry',
+      name: verifiedDisplayName || (isOwner ? 'Thierry Maniriho (Platform Owner)' : 'Authorized Administrator'),
+      email: verifiedEmail,
+      role,
       active: true,
       lastLogin: new Date().toISOString()
     };
@@ -1623,7 +1747,7 @@ app.post('/api/auth/firebase-login', (req: Request, res: Response) => {
       expiresAt: Date.now() + 24 * 60 * 60 * 1000
     });
 
-    logAudit({ name: adminUser.name, role: adminUser.role }, 'FIREBASE_GOOGLE_LOGIN', `Admin signed in with Google Firebase Auth (${normalizedEmail})`);
+    logAudit({ name: adminUser.name, role: adminUser.role }, 'FIREBASE_GOOGLE_LOGIN', `Admin signed in with Google Firebase Auth (${verifiedEmail})`);
 
     return res.json({
       token,
@@ -1632,7 +1756,7 @@ app.post('/api/auth/firebase-login', (req: Request, res: Response) => {
   }
 
   return res.status(403).json({
-    error: `The Google account (${normalizedEmail}) is not authorized as an administrator for ContactReach Market.`
+    error: `The Google account (${verifiedEmail}) is not authorized as an administrator for ContactReach Market.`
   });
 });
 
@@ -2300,6 +2424,32 @@ app.post('/api/admin/payments/:id/verify', requireAdminAuth, requireRole(['owner
         order.stockDeducted = true;
       }
 
+      // Automatically create Supplier Payout record if not already present
+      db.supplierPayouts = db.supplierPayouts || [];
+      const existingPayout = db.supplierPayouts.find(p => p.orderId === order.id || p.orderNumber === order.orderNumber);
+      if (!existingPayout) {
+        const commRate = order.commissionRate || 10;
+        const commFrw = order.commissionEarned || Math.round((order.subtotal * commRate) / 100);
+        const payoutFrw = order.supplierPayoutAmount || Math.max(0, order.subtotal - commFrw);
+        const shop = db.shops.find(s => s.name.toLowerCase() === (order.shopName || '').toLowerCase());
+
+        const payoutRecord: SupplierPayoutRecord = {
+          id: `payout-${Date.now()}-${crypto.randomBytes(2).toString('hex')}`,
+          shopId: shop?.id || 'shop-general',
+          shopName: order.shopName || 'ContactReach Market Supplier',
+          orderId: order.id,
+          orderNumber: order.orderNumber,
+          orderTotal: order.totalAmount,
+          commissionRate: commRate,
+          commissionEarned: commFrw,
+          payoutAmount: payoutFrw,
+          status: 'Pending',
+          createdAt: new Date().toISOString()
+        };
+        db.supplierPayouts.unshift(payoutRecord);
+        saveToFirestoreAsync('supplierPayouts', payoutRecord.id, payoutRecord);
+      }
+
       order.statusHistory.push({
         status: 'Confirmed',
         paymentStatus: 'Paid',
@@ -2815,6 +2965,13 @@ app.post('/api/admin/supplier-payouts/:id/disburse', requireAdminAuth, requireRo
   db.supplierPayouts = db.supplierPayouts || [];
   const payout = db.supplierPayouts.find(p => p.id === req.params.id);
   if (!payout) return res.status(404).json({ error: 'Payout record not found' });
+
+  // Guard against duplicate payout disbursements
+  if (payout.status === 'Paid') {
+    return res.status(400).json({
+      error: `Supplier payout of ${payout.payoutAmount.toLocaleString()} FRW has already been disbursed on ${payout.paidAt} (Ref: ${payout.paymentReference}). Duplicate payout disbursement is blocked.`
+    });
+  }
 
   payout.status = 'Paid';
   payout.paymentReference = paymentReference || `MOMO-${Date.now().toString().slice(-6)}`;

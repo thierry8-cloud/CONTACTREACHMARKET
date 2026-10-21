@@ -150,6 +150,7 @@
         "transactionId": { "type": "string", "maxLength": 64 },
         "status": { "type": "string", "enum": ["Pending Review", "Approved", "Rejected", "Refunded"] },
         "screenshotUrl": { "type": "string", "maxLength": 1000 },
+        "confirmationMessage": { "type": "string", "maxLength": 3000 },
         "submittedAt": { "type": "string", "format": "date-time" },
         "verifiedAt": { "type": "string", "format": "date-time" },
         "verifiedBy": { "type": "string", "maxLength": 128 },

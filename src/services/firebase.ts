@@ -367,3 +367,44 @@ export async function getCustomerFromFirestore(customerId: string): Promise<Cust
   }
 }
 
+// Order Updates (Status, Payment, Courier)
+export async function updateOrderInFirestore(order: Order): Promise<void> {
+  const docPath = `orders/${order.id}`;
+  try {
+    await setDoc(doc(db, 'orders', order.id), cleanForFirestore(order), { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, docPath);
+  }
+}
+
+// Payment Confirmation Verification Updates
+export async function updatePaymentInFirestore(payment: PaymentConfirmation): Promise<void> {
+  const docPath = `paymentConfirmations/${payment.id}`;
+  try {
+    await setDoc(doc(db, 'paymentConfirmations', payment.id), cleanForFirestore(payment), { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, docPath);
+  }
+}
+
+// Supplier Payout Records
+export async function saveSupplierPayoutToFirestore(payout: any): Promise<void> {
+  const docPath = `supplierPayouts/${payout.id}`;
+  try {
+    await setDoc(doc(db, 'supplierPayouts', payout.id), cleanForFirestore(payout));
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, docPath);
+  }
+}
+
+// Supplier Application Status Updates
+export async function updateSupplierApplicationInFirestore(appData: any): Promise<void> {
+  const docPath = `supplierApplications/${appData.id}`;
+  try {
+    await setDoc(doc(db, 'supplierApplications', appData.id), cleanForFirestore(appData), { merge: true });
+  } catch (error) {
+    handleFirestoreError(error, OperationType.UPDATE, docPath);
+  }
+}
+
+

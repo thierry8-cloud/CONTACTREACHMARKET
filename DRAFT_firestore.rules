@@ -1,225 +1,631 @@
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
+import assert from 'assert';
+import crypto from 'crypto';
 
-    // Default deny catch-all
-    match /{document=**} {
-      allow read, write: if false;
-    }
+// Comprehensive ContactReach Market Production Test Suite
+// Testing: Authentication, RBAC, Cart/Checkout, Delivery, Coupons,
+// Tracking privacy, Supplier commissions, Stock reservation, and Data integrity.
 
-    // Helper functions
-    function isValidId(id) {
-      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
-    }
+const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 
-    function incoming() {
-      return request.resource.data;
-    }
+async function runTests() {
+  console.log('====================================================');
+  console.log('🧪 Starting ContactReach Market Automated Test Suite');
+  console.log('====================================================\n');
 
-    function existing() {
-      return resource.data;
-    }
+  let passed = 0;
+  let failed = 0;
 
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    function isVerifiedAdmin() {
-      return isSignedIn() && (
-        ((request.auth.token.email == 'inzozilink@gmail.com' || request.auth.token.email == 'contactreachmedialimited@gmail.com' || request.auth.token.email == 'manirihothierry11@gmail.com' || request.auth.token.email == 'admin@contactreachmedia.rw') && request.auth.token.email_verified == true) ||
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
-      );
-    }
-
-    function isValidProduct(data) {
-      return data.id is string && data.id.size() <= 128 &&
-             data.name is string && data.name.size() > 0 && data.name.size() <= 200 &&
-             data.price is number && data.price >= 0 &&
-             data.category is string && data.category.size() <= 64 &&
-             data.stock is number && data.stock >= 0 &&
-             data.status in ['Available', 'Out of Stock', 'Hidden'];
-    }
-
-    function isValidOrder(data) {
-      return data.id is string && data.id.size() <= 128 &&
-             data.orderNumber is string && data.orderNumber.size() > 0 && data.orderNumber.size() <= 32 &&
-             data.customerName is string && data.customerName.size() > 0 && data.customerName.size() <= 128 &&
-             data.customerPhone is string && data.customerPhone.size() > 0 && data.customerPhone.size() <= 32 &&
-             data.items is list && data.items.size() > 0 && data.items.size() <= 100 &&
-             data.totalAmount is number && data.totalAmount >= 0;
-    }
-
-    function isValidPayment(data) {
-      return data.id is string && data.id.size() <= 128 &&
-             data.orderNumber is string && data.orderNumber.size() > 0 && data.orderNumber.size() <= 32 &&
-             data.amountPaid is number && data.amountPaid > 0 &&
-             data.transactionId is string && data.transactionId.size() > 0 && data.transactionId.size() <= 64;
-    }
-
-    function isValidMessage(data) {
-      return data.id is string && data.id.size() <= 128 &&
-             data.name is string && data.name.size() > 0 && data.name.size() <= 128 &&
-             data.email is string && data.email.size() > 0 && data.email.size() <= 128 &&
-             data.message is string && data.message.size() > 0 && data.message.size() <= 3000;
-    }
-
-    function isValidProblemReport(data) {
-      return data.id is string && data.id.size() <= 128 &&
-             data.caseNumber is string && data.caseNumber.size() > 0 && data.caseNumber.size() <= 32 &&
-             data.customerName is string && data.customerName.size() > 0 && data.customerName.size() <= 128 &&
-             data.customerPhone is string && data.customerPhone.size() > 0 && data.customerPhone.size() <= 32 &&
-             data.category is string && data.category.size() <= 64 &&
-             data.description is string && data.description.size() > 0 && data.description.size() <= 3000;
-    }
-
-    function isValidReview(data) {
-      return data.id is string && data.id.size() <= 128 &&
-             data.productId is string && data.productId.size() <= 128 &&
-             data.customerName is string && data.customerName.size() > 0 && data.customerName.size() <= 128 &&
-             data.rating is number && data.rating >= 1 && data.rating <= 5 &&
-             data.comment is string && data.comment.size() > 0 && data.comment.size() <= 1000;
-    }
-
-    // Products collection
-    match /products/{productId} {
-      allow read: if true;
-      allow create: if isVerifiedAdmin() && isValidId(productId) && isValidProduct(incoming());
-      allow update: if isVerifiedAdmin() && isValidId(productId) && isValidProduct(incoming());
-      allow delete: if isVerifiedAdmin() && isValidId(productId);
-    }
-
-    // Categories collection
-    match /categories/{categoryId} {
-      allow read: if true;
-      allow create, update, delete: if isVerifiedAdmin() && isValidId(categoryId);
-    }
-
-    // Shops collection
-    match /shops/{shopId} {
-      allow read: if true;
-      allow create, update, delete: if isVerifiedAdmin() && isValidId(shopId);
-    }
-
-    // Supplier Applications
-    match /supplierApplications/{applicationId} {
-      allow get, list: if isVerifiedAdmin();
-      allow create: if isValidId(applicationId) && incoming().status == 'Pending';
-      allow update, delete: if isVerifiedAdmin() && isValidId(applicationId);
-    }
-
-    // Orders collection
-    match /orders/{orderId} {
-      allow get: if true;
-      allow list: if isVerifiedAdmin() || (isSignedIn() && resource.data.userId == request.auth.uid);
-      allow create: if isValidId(orderId) && isValidOrder(incoming()) && incoming().status == 'New' && incoming().paymentStatus == 'Pending Payment';
-      allow update: if isVerifiedAdmin() && isValidId(orderId) && isValidOrder(incoming());
-      allow delete: if isVerifiedAdmin() && isValidId(orderId);
-    }
-
-    // Payments collection
-    match /payments/{paymentId} {
-      allow get, list: if isVerifiedAdmin();
-      allow create: if isValidId(paymentId) && isValidPayment(incoming()) && incoming().status == 'Pending Review';
-      allow update, delete: if isVerifiedAdmin() && isValidId(paymentId);
-    }
-
-    // Payment Confirmations
-    match /paymentConfirmations/{confirmationId} {
-      allow get, list: if isVerifiedAdmin();
-      allow create: if isValidId(confirmationId) && isValidPayment(incoming()) && (incoming().verificationStatus in ['Pending Review', 'Pending Verification', 'Payment Submitted', 'Under Verification'] || incoming().status in ['Pending Review', 'Pending Verification', 'Payment Submitted', 'Under Verification']);
-      allow update, delete: if isVerifiedAdmin() && isValidId(confirmationId);
-    }
-
-    // Refunds
-    match /refunds/{refundId} {
-      allow read, write: if isVerifiedAdmin() && isValidId(refundId);
-    }
-
-    // Deliveries
-    match /deliveries/{deliveryId} {
-      allow read, write: if isVerifiedAdmin() && isValidId(deliveryId);
-    }
-
-    // Supplier Payouts
-    match /supplierPayouts/{payoutId} {
-      allow read, write: if isVerifiedAdmin() && isValidId(payoutId);
-    }
-
-    // Coupons
-    match /coupons/{couponId} {
-      allow read: if true;
-      allow create, update, delete: if isVerifiedAdmin() && isValidId(couponId);
-    }
-
-    // Coupon Redemptions
-    match /couponRedemptions/{redemptionId} {
-      allow read: if isVerifiedAdmin();
-      allow create: if isValidId(redemptionId);
-      allow update, delete: if isVerifiedAdmin() && isValidId(redemptionId);
-    }
-
-    // Inventory Logs
-    match /inventoryLogs/{logId} {
-      allow read, write: if isVerifiedAdmin() && isValidId(logId);
-    }
-
-    // Audit Logs
-    match /auditLogs/{logId} {
-      allow read, write: if isVerifiedAdmin() && isValidId(logId);
-    }
-
-    // Customers / Buyers
-    match /customers/{customerId} {
-      allow get: if true;
-      allow list: if isVerifiedAdmin();
-      allow create, update: if isValidId(customerId);
-      allow delete: if isVerifiedAdmin() && isValidId(customerId);
-    }
-
-    // Users
-    match /users/{userId} {
-      allow get: if isSignedIn() && (request.auth.uid == userId || isVerifiedAdmin());
-      allow list: if isVerifiedAdmin();
-      allow create, update: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
-      allow delete: if isVerifiedAdmin() && isValidId(userId);
-    }
-
-    // Contact messages
-    match /messages/{messageId} {
-      allow get, list: if isVerifiedAdmin();
-      allow create: if isValidId(messageId) && isValidMessage(incoming()) && incoming().status == 'unread';
-      allow update, delete: if isVerifiedAdmin() && isValidId(messageId);
-    }
-
-    // Customer Problem Reports
-    match /customerProblems/{problemId} {
-      allow get: if true;
-      allow list: if isVerifiedAdmin();
-      allow create: if isValidId(problemId) && isValidProblemReport(incoming()) && incoming().status == 'New';
-      allow update, delete: if isVerifiedAdmin() && isValidId(problemId);
-    }
-
-    // Reviews
-    match /reviews/{reviewId} {
-      allow read: if true;
-      allow create: if isValidId(reviewId) && isValidReview(incoming());
-      allow update, delete: if isVerifiedAdmin() && isValidId(reviewId);
-    }
-
-    // Admin profiles & access control
-    match /admins/{adminUid} {
-      allow read, write: if isVerifiedAdmin() && isValidId(adminUid);
-    }
-
-    // App settings
-    match /settings/{settingId} {
-      allow read: if true;
-      allow write: if isVerifiedAdmin() && isValidId(settingId);
-    }
-
-    // Test connection probe document
-    match /test/{docId} {
-      allow read: if true;
+  async function test(name: string, fn: () => Promise<void>) {
+    try {
+      await fn();
+      console.log(`✅ PASS: ${name}`);
+      passed++;
+    } catch (err: any) {
+      console.error(`❌ FAIL: ${name}`);
+      console.error(`   Error: ${err.message || err}`);
+      failed++;
     }
   }
+
+  // TEST 1: Public Storefront Endpoints Available
+  await test('Public storefront endpoints return clean initial state', async () => {
+    const res = await fetch(`${BASE_URL}/api/settings`);
+    assert.strictEqual(res.status, 200, 'Settings endpoint should return 200');
+    const settings = await res.json();
+    assert.strictEqual(settings.marketName, 'ContactReach Market');
+    assert.strictEqual(settings.email, 'contactreachmedialimited@gmail.com');
+
+    const catRes = await fetch(`${BASE_URL}/api/categories`);
+    assert.strictEqual(catRes.status, 200);
+    const categories = await catRes.json();
+    assert(Array.isArray(categories) && categories.length >= 10, 'Should return at least 10 official categories');
+
+    const prodRes = await fetch(`${BASE_URL}/api/products`);
+    assert.strictEqual(prodRes.status, 200);
+    const products = await prodRes.json();
+    assert(Array.isArray(products), 'Products should be an array');
+  });
+
+  // TEST 2: Admin Authentication Security & Bad Password Rejection
+  await test('Admin auth rejects invalid passwords and prevents backdoors', async () => {
+    const badLogin = await fetch(`${BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'contactreachmedialimited@gmail.com', password: 'WrongPassword123' })
+    });
+    assert.strictEqual(badLogin.status, 401, 'Invalid password should be rejected with 401');
+
+    const unauthorizedAccount = await fetch(`${BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'attacker@evil.com', password: 'CRM@2026' })
+    });
+    assert.strictEqual(unauthorizedAccount.status, 401, 'Unauthorized emails should be rejected');
+  });
+
+  // TEST 3: Admin Authentication Success with Authorized Credentials
+  let adminToken = '';
+  await test('Admin login succeeds with verified credentials and issues session token', async () => {
+    const loginRes = await fetch(`${BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'contactreachmedialimited@gmail.com',
+        password: process.env.ADMIN_PASSWORD || 'CRM@2026'
+      })
+    });
+    assert.strictEqual(loginRes.status, 200, 'Admin login should succeed');
+    const data = await loginRes.json();
+    assert(data.token, 'Session token should be returned');
+    assert.strictEqual(data.admin.role, 'owner', 'Role should be owner');
+    adminToken = data.token;
+  });
+
+  // TEST 4: Protected Admin Endpoints Guard
+  await test('Protected admin endpoints require valid Bearer token', async () => {
+    const unauth = await fetch(`${BASE_URL}/api/admin/stats`);
+    assert.strictEqual(unauth.status, 401, 'Stats without token should be 401');
+
+    const authRes = await fetch(`${BASE_URL}/api/admin/stats`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    assert.strictEqual(authRes.status, 200, 'Stats with token should be 200');
+    const stats = await authRes.json();
+    assert(typeof stats.totalOrders === 'number', 'totalOrders should be numeric');
+  });
+
+  // TEST 5: Coupon Validation Logic
+  await test('Coupon validation accurately calculates percentage discount with bounds', async () => {
+    const res = await fetch(`${BASE_URL}/api/coupons/validate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: 'WELCOME10', subtotal: 25000 })
+    });
+    assert.strictEqual(res.status, 200);
+    const data = await res.json();
+    assert.strictEqual(data.valid, true);
+    assert.strictEqual(data.discountAmount, 2500, '10% of 25000 should be 2500');
+
+    // Test under min amount
+    const underMin = await fetch(`${BASE_URL}/api/coupons/validate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: 'WELCOME10', subtotal: 5000 })
+    });
+    assert.strictEqual(underMin.status, 400, 'Should reject order under 10000 min order threshold');
+  });
+
+  // TEST 6: Supplier Application Submission & Management
+  let applicationId = '';
+  await test('Supplier can apply and admin can review application', async () => {
+    const applyRes = await fetch(`${BASE_URL}/api/supplier-applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        businessName: 'Kigali Quality Audio Ltd',
+        ownerName: 'Jean Paul',
+        phone: '0788990011',
+        email: 'jeanpaul@qualityaudio.rw',
+        location: 'Downtown Kigali, Quartier Commercial',
+        category: 'electronics',
+        description: 'Authorized importer of sound systems and smart audio accessories.'
+      })
+    });
+    assert.strictEqual(applyRes.status, 201, 'Application submission should be 201');
+    const appData = await applyRes.json();
+    applicationId = appData.application.id;
+
+    // Admin view
+    const adminAppsRes = await fetch(`${BASE_URL}/api/admin/supplier-applications`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    assert.strictEqual(adminAppsRes.status, 200);
+    const apps = await adminAppsRes.json();
+    assert(apps.some((a: any) => a.id === applicationId), 'Submitted application should appear in admin list');
+
+    // Admin approve
+    const approveRes = await fetch(`${BASE_URL}/api/admin/supplier-applications/${applicationId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ status: 'Approved' })
+    });
+    assert.strictEqual(approveRes.status, 200);
+    const approved = await approveRes.json();
+    assert.strictEqual(approved.status, 'Approved');
+  });
+
+  // TEST 7: Product Creation with Supplier Association & Price in RWF
+  let createdProductId = '';
+  await test('Admin can add verified supplier product with inventory', async () => {
+    const prodRes = await fetch(`${BASE_URL}/api/admin/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({
+        name: 'Wireless Studio Bluetooth Headphones',
+        category: 'electronics',
+        description: 'Crystal clear studio sound with deep bass and noise cancellation.',
+        price: 35000,
+        stock: 15,
+        shopName: 'Kigali Quality Audio Ltd',
+        status: 'Available'
+      })
+    });
+    assert.strictEqual(prodRes.status, 201);
+    const prod = await prodRes.json();
+    assert.strictEqual(prod.name, 'Wireless Studio Bluetooth Headphones');
+    assert.strictEqual(prod.price, 35000);
+    assert.strictEqual(prod.stock, 15);
+    createdProductId = prod.id;
+  });
+
+  // TEST 8: Order Placement, Commission Calculation, and Tracking Token
+  let createdOrderNumber = '';
+  let createdTrackingToken = '';
+  await test('Customer order checkout calculates delivery fee, commissions, and generates tracking token', async () => {
+    const orderRes = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: 'Aline Mugabo',
+        customerPhone: '0788123456',
+        deliveryLocation: 'Gasabo (Kimironko)',
+        deliveryAddress: 'KG 15 Ave, Kimironko',
+        items: [{ productId: createdProductId, quantity: 1 }],
+        paymentMethod: 'MTN Mobile Money'
+      })
+    });
+    assert.strictEqual(orderRes.status, 201);
+    const order = await orderRes.json();
+    assert(order.orderNumber, 'Order number should be generated');
+    assert(order.trackingToken, 'Unguessable tracking token must be generated');
+    assert.strictEqual(order.subtotal, 35000);
+    assert.strictEqual(order.deliveryFee, 1500, 'Gasabo delivery fee should be 1500 FRW');
+    assert.strictEqual(order.totalAmount, 36500, 'Total should be 35000 + 1500 = 36500');
+    assert.strictEqual(order.commissionEarned, 3500, '10% marketplace commission on 35000 should be 3500');
+    assert.strictEqual(order.supplierPayoutAmount, 31500, 'Supplier payout should be 31500');
+
+    createdOrderNumber = order.orderNumber;
+    createdTrackingToken = order.trackingToken;
+  });
+
+  // TEST 9: Order Tracking Privacy Guard
+  await test('Order tracking enforces token/phone check and sanitizes public fields', async () => {
+    // Attempt 1: tracking without credentials should be rejected
+    const unauthenticated = await fetch(`${BASE_URL}/api/orders/${createdOrderNumber}`);
+    assert.strictEqual(unauthenticated.status, 403, 'Public tracking without phone or token must be rejected with 403');
+
+    // Attempt 2: tracking with correct token should succeed with sanitized data
+    const tokenTrack = await fetch(`${BASE_URL}/api/orders/${createdOrderNumber}?token=${createdTrackingToken}`);
+    assert.strictEqual(tokenTrack.status, 200, 'Tracking with valid trackingToken must succeed');
+    const tokenData = await tokenTrack.json();
+    assert.strictEqual(tokenData.orderNumber, createdOrderNumber);
+    assert.strictEqual(tokenData.commissionEarned, undefined, 'Public tracking MUST NOT leak internal commission');
+    assert.strictEqual(tokenData.supplierPayoutAmount, undefined, 'Public tracking MUST NOT leak supplier payouts');
+
+    // Attempt 3: tracking with recipient phone number should succeed
+    const phoneTrack = await fetch(`${BASE_URL}/api/orders/${createdOrderNumber}?phone=0788123456`);
+    assert.strictEqual(phoneTrack.status, 200, 'Tracking with matching recipient phone must succeed');
+  });
+
+  // TEST 10: Payment Confirmation Submission & Administrative Verification
+  let confirmationId = '';
+  await test('Customer can submit payment confirmation and admin can approve', async () => {
+    const confirmRes = await fetch(`${BASE_URL}/api/payments/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderNumber: createdOrderNumber,
+        customerName: 'Aline Mugabo',
+        paymentPhone: '0788123456',
+        paymentMethod: 'MTN Mobile Money',
+        amountPaid: 36500,
+        transactionId: `TXN${Date.now()}`
+      })
+    });
+    assert.strictEqual(confirmRes.status, 200);
+    const confData = await confirmRes.json();
+    assert(
+      confData.confirmation.verificationStatus === 'Pending Verification' || confData.confirmation.verificationStatus === 'Pending Review',
+      'Should be in Pending Verification or Pending Review state'
+    );
+    assert.strictEqual(confData.order.paymentStatus, 'Pending Verification');
+    confirmationId = confData.confirmation.id;
+
+    // Admin verifies and approves payment
+    const verifyRes = await fetch(`${BASE_URL}/api/admin/payments/${confirmationId}/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ action: 'approve', adminNotes: 'Verified via MTN MoMo statement.' })
+    });
+    assert.strictEqual(verifyRes.status, 200);
+    const verifiedData = await verifyRes.json();
+    assert.strictEqual(verifiedData.order.paymentStatus, 'Paid');
+    assert.strictEqual(verifiedData.order.status, 'Confirmed');
+    assert.strictEqual(verifiedData.order.stockDeducted, true, 'Stock should be deducted upon verified payment');
+
+    // Check product stock deduction
+    const prodCheck = await fetch(`${BASE_URL}/api/products/${createdProductId}`);
+    const updatedProd = await prodCheck.json();
+    assert.strictEqual(updatedProd.stock, 14, 'Stock should decrease from 15 to 14');
+  });
+
+  // TEST 10B: Payment Confirmation with Pasted SMS Message and Screenshot Proof
+  await test('Customer can submit payment confirmation by pasting SMS message and admin can review proof', async () => {
+    // Create a new order to test pasted SMS confirmation flow
+    const orderRes = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: 'Kwizera Bosco',
+        customerPhone: '0780112233',
+        deliveryLocation: 'Kicukiro (Sonatubes)',
+        deliveryAddress: 'Sonatubes near Bank of Kigali',
+        items: [{ productId: createdProductId, quantity: 1 }],
+        paymentMethod: 'MTN Merchant Code'
+      })
+    });
+    assert.strictEqual(orderRes.status, 201);
+    const order = await orderRes.json();
+
+    const sampleSms = `Y'ello! You have transferred 36,500 RWF to ContactReach Market (078002) on 2026-10-21. TxId: 991827461. Fee: 100 RWF. New balance: 140,200 RWF.`;
+    const sampleScreenshot = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+
+    const confirmRes = await fetch(`${BASE_URL}/api/payments/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderNumber: order.orderNumber,
+        customerName: 'Kwizera Bosco',
+        paymentPhone: '0780112233',
+        paymentMethod: 'MTN Merchant Code',
+        amountPaid: 36500,
+        confirmationMessage: sampleSms,
+        screenshotUrl: sampleScreenshot
+      })
+    });
+    assert.strictEqual(confirmRes.status, 200, 'Confirmation submission with pasted SMS must succeed');
+    const confirmData = await confirmRes.json();
+    assert.strictEqual(confirmData.confirmation.confirmationMessage, sampleSms, 'Pasted SMS message must be preserved');
+    assert.strictEqual(confirmData.confirmation.transactionId, '991827461', 'TxId should be automatically extracted from SMS');
+    assert(confirmData.confirmation.screenshotUrl, 'Screenshot URL must be stored');
+
+    // Admin can retrieve the payment confirmation with proof details
+    const adminPaymentsRes = await fetch(`${BASE_URL}/api/admin/payments`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    assert.strictEqual(adminPaymentsRes.status, 200);
+    const paymentsList = await adminPaymentsRes.json();
+    const foundPm = paymentsList.find((p: any) => p.orderNumber === order.orderNumber);
+    assert(foundPm, 'Payment record should be listed for admin');
+    assert.strictEqual(foundPm.confirmationMessage, sampleSms, 'Admin must see customer pasted SMS message');
+    assert.strictEqual(foundPm.screenshotUrl, sampleScreenshot, 'Admin must see customer uploaded screenshot');
+  });
+
+  // TEST 11: SEO and Structured Output Routes
+  await test('Robots.txt and Sitemap.xml are dynamically served', async () => {
+    const robotsRes = await fetch(`${BASE_URL}/robots.txt`);
+    assert.strictEqual(robotsRes.status, 200);
+    const robotsText = await robotsRes.text();
+    assert(robotsText.includes('Sitemap:'), 'Robots.txt must declare sitemap');
+
+    const sitemapRes = await fetch(`${BASE_URL}/sitemap.xml`);
+    assert.strictEqual(sitemapRes.status, 200);
+    const sitemapText = await sitemapRes.text();
+    assert(sitemapText.includes('<urlset'), 'Sitemap must contain XML urlset');
+    assert(sitemapText.includes(createdProductId), 'Sitemap should include active product URLs');
+  });
+
+  // TEST 12: Buyer Exclusive Google Authentication & Rejection of Legacy Password Flows
+  const buyerGoogleEmail = `buyer.shopper.${Date.now()}@gmail.com`;
+  const buyerGoogleUid = `google_uid_${Date.now()}`;
+  let registeredBuyerId = '';
+  let buyerToken = '';
+
+  await test('Buyer signs in exclusively with Google, and legacy password registration is rejected', async () => {
+    // 1. Verify legacy password registration is rejected in favor of Google-only
+    const legacyRegRes = await fetch(`${BASE_URL}/api/buyers/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        phone: '0789123456',
+        password: '12345'
+      })
+    });
+    assert.strictEqual(legacyRegRes.status, 400, 'Legacy password registration must be rejected');
+    const legacyRegData = await legacyRegRes.json();
+    assert.strictEqual(legacyRegData.useGoogleSignIn, true, 'Response must instruct to use Google Sign-In');
+
+    // 2. Successful Buyer Google Sign-In
+    const googleLoginRes = await fetch(`${BASE_URL}/api/buyers/google-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: buyerGoogleEmail,
+        displayName: 'Gisele Uwase',
+        uid: buyerGoogleUid,
+        photoURL: 'https://lh3.googleusercontent.com/a/default-user',
+        phoneNumber: '0789123456'
+      })
+    });
+    assert.strictEqual(googleLoginRes.status, 200, 'Buyer Google login should return 200');
+    const loginData = await googleLoginRes.json();
+    assert(loginData.token, 'Session token should be returned');
+    assert.strictEqual(loginData.user.email, buyerGoogleEmail);
+    assert.strictEqual(loginData.user.name, 'Gisele Uwase');
+    assert.strictEqual(loginData.user.authProvider, 'google');
+    registeredBuyerId = loginData.user.id;
+    buyerToken = loginData.token;
+
+    // 3. Buyer can fetch profile with session token
+    const meRes = await fetch(`${BASE_URL}/api/buyers/me`, {
+      headers: { Authorization: `Bearer ${buyerToken}` }
+    });
+    assert.strictEqual(meRes.status, 200);
+    const meData = await meRes.json();
+    assert.strictEqual(meData.user.id, registeredBuyerId);
+    assert.strictEqual(meData.user.email, buyerGoogleEmail);
+
+    // 4. Buyer can update delivery details (address & courier phone)
+    const updateRes = await fetch(`${BASE_URL}/api/buyers/profile`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${buyerToken}`
+      },
+      body: JSON.stringify({
+        deliveryAddress: 'Kigali, Kicukiro, Sonatubes',
+        phone: '0789123456'
+      })
+    });
+    assert.strictEqual(updateRes.status, 200);
+    const updatedData = await updateRes.json();
+    assert.strictEqual(updatedData.user.deliveryAddress, 'Kigali, Kicukiro, Sonatubes');
+  });
+
+  // TEST 13: Admin Can See Google-Authenticated Buyer Information
+  await test('User information can be seen by admin with full Google profile and security status', async () => {
+    const adminCustRes = await fetch(`${BASE_URL}/api/admin/customers`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    assert.strictEqual(adminCustRes.status, 200, 'Admin can view all customers');
+    const allCustomers = await adminCustRes.json();
+    const createdBuyer = allCustomers.find((c: any) => c.email === buyerGoogleEmail || c.id === registeredBuyerId);
+    assert(createdBuyer, 'Created Google buyer must appear in admin customer directory');
+    assert.strictEqual(createdBuyer.name, 'Gisele Uwase');
+    assert.strictEqual(createdBuyer.isRegisteredBuyer, true, 'Admin can see that user has registered account');
+    assert.strictEqual(createdBuyer.deliveryAddress, 'Kigali, Kicukiro, Sonatubes');
+
+    // Admin can get detailed customer profile and associated orders
+    const detailRes = await fetch(`${BASE_URL}/api/admin/customers/${registeredBuyerId}`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    assert.strictEqual(detailRes.status, 200, 'Admin can view individual customer profile');
+    const detailData = await detailRes.json();
+    assert.strictEqual(detailData.customer.id, registeredBuyerId);
+    assert.strictEqual(detailData.customer.email, buyerGoogleEmail);
+    assert(Array.isArray(detailData.orders), 'Orders list should be an array');
+  });
+
+
+  // TEST 14: Percentage Discount Calculation on Products
+  await test('Admin product creation supports % percentage discount and auto-computes promo price', async () => {
+    const prodWithDiscountRes = await fetch(`${BASE_URL}/api/admin/products`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({
+        name: 'Glow Facial Vitamin C Serum (20% OFF Special)',
+        price: 25000,
+        discountPercent: 20,
+        category: 'hair-beauty',
+        description: 'Brightening facial serum with 20% promotional discount.',
+        stock: 40
+      })
+    });
+    assert.strictEqual(prodWithDiscountRes.status, 201, 'Product with % discount should be created');
+    const createdDiscountProd = await prodWithDiscountRes.json();
+    assert.strictEqual(createdDiscountProd.price, 25000);
+    assert.strictEqual(createdDiscountProd.discountPercent, 20, 'discountPercent must be 20%');
+    assert.strictEqual(createdDiscountProd.discountPrice, 20000, '20% off 25,000 FRW must be 20,000 FRW');
+
+    // Update discount to 30%
+    const updateDiscountRes = await fetch(`${BASE_URL}/api/admin/products/${createdDiscountProd.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({
+        discountPercent: 30
+      })
+    });
+    assert.strictEqual(updateDiscountRes.status, 200);
+    const updatedDiscountProd = await updateDiscountRes.json();
+    assert.strictEqual(updatedDiscountProd.discountPercent, 30);
+    assert.strictEqual(updatedDiscountProd.discountPrice, 17500, '30% off 25,000 FRW must be 17,500 FRW');
+  });
+
+  // TEST 16: Simplified Payment Flow - Method Switching without Duplicate Orders, Duplicate Txn ID Flagging & Under Verification
+  await test('Customer can switch payment method on existing order, duplicate transaction IDs are flagged suspicious, and admin can mark Under Verification', async () => {
+    // 1. Create order
+    const orderRes = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: 'Gisele Umuhoza',
+        customerPhone: '0788776655',
+        deliveryLocation: 'Nyarugenge (City Center)',
+        deliveryAddress: 'KN 4 Ave, Kigali',
+        items: [{ productId: createdProductId, quantity: 1 }],
+        paymentMethod: 'MTN Merchant Code'
+      })
+    });
+    assert.strictEqual(orderRes.status, 201);
+    const order = await orderRes.json();
+    assert.strictEqual(order.paymentMethod, 'MTN Merchant Code');
+
+    // 2. Switch payment method on the SAME order reference without creating a duplicate order
+    const switchRes = await fetch(`${BASE_URL}/api/orders/${order.orderNumber}/payment-method`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentMethod: 'Airtel Money' })
+    });
+    assert.strictEqual(switchRes.status, 200, 'Switching payment method must succeed');
+    const switchData = await switchRes.json();
+    assert.strictEqual(switchData.order.paymentMethod, 'Airtel Money');
+    assert.strictEqual(switchData.order.orderNumber, order.orderNumber, 'Order reference must remain identical');
+
+    // 3. Submit payment confirmation with a transaction ID that was already used on an earlier order (e.g. 991827461)
+    const duplicateTxn = '991827461'; // used in Test 10B
+    const confirmRes = await fetch(`${BASE_URL}/api/payments/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderNumber: order.orderNumber,
+        customerName: 'Gisele Umuhoza',
+        paymentPhone: '0788776655',
+        paymentMethod: 'Airtel Money',
+        amountPaid: order.totalAmount,
+        transactionId: duplicateTxn
+      })
+    });
+    assert.strictEqual(confirmRes.status, 200);
+    const confirmData = await confirmRes.json();
+    assert.strictEqual(confirmData.confirmation.flaggedSuspicious, true, 'Duplicate transaction ID must be flagged suspicious');
+    assert.strictEqual(confirmData.confirmation.isDuplicateTxn, true);
+    assert(confirmData.confirmation.suspiciousReason?.includes(duplicateTxn));
+
+    // 4. Admin marks payment as Under Verification
+    const auditRes = await fetch(`${BASE_URL}/api/admin/payments/${confirmData.confirmation.id}/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ action: 'under_verification', adminNotes: 'Suspicious duplicate transaction reference detected. Requesting telecom statement export.' })
+    });
+    assert.strictEqual(auditRes.status, 200);
+    const auditData = await auditRes.json();
+    assert.strictEqual(auditData.confirmation.verificationStatus, 'Under Verification');
+    assert.strictEqual(auditData.order.paymentStatus, 'Under Verification');
+  });
+
+  // TEST 12: Maintenance Mode ON/OFF Toggle & Public Storefront Gating
+  await test('Maintenance mode enforces admin-only permissions, gates checkout, and preserves access', async () => {
+    // 1. Unauthorized attempt to toggle maintenance mode should fail with 401
+    const unauthToggle = await fetch(`${BASE_URL}/api/admin/maintenance-toggle`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ isMaintenanceMode: true })
+    });
+    assert.strictEqual(unauthToggle.status, 401, 'Unauthorized request cannot toggle maintenance mode');
+
+    // 2. Admin successfully turns Maintenance Mode ON
+    const enableRes = await fetch(`${BASE_URL}/api/admin/maintenance-toggle`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({
+        isMaintenanceMode: true,
+        maintenanceTitle: "We'll Be Back Soon",
+        maintenanceMessage: "Planned system upgrades are underway. ContactReach Market will be back shortly!",
+        maintenanceEstimatedTime: "Approx. 30 minutes"
+      })
+    });
+    assert.strictEqual(enableRes.status, 200, 'Admin maintenance toggle ON must return 200');
+    const enableData = await enableRes.json();
+    assert.strictEqual(enableData.settings.isMaintenanceMode, true);
+    assert.strictEqual(enableData.settings.maintenanceTitle, "We'll Be Back Soon");
+
+    // 3. Public settings endpoint reflects Maintenance Mode is ON
+    const settingsCheck = await fetch(`${BASE_URL}/api/settings`);
+    assert.strictEqual(settingsCheck.status, 200);
+    const publicSettings = await settingsCheck.json();
+    assert.strictEqual(publicSettings.isMaintenanceMode, true, 'Public settings must reflect maintenance mode is ON');
+
+    // 4. Public visitor checkout is blocked with 503 during Maintenance Mode
+    const blockedCheckout = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: 'Visitor Tester',
+        customerPhone: '0780112233',
+        deliveryType: 'delivery',
+        deliveryLocation: 'Kigali',
+        deliveryAddress: 'Remera',
+        items: [{ productId: 'prod-hair-curl-cream', quantity: 1 }],
+        paymentMethod: 'MTN Mobile Money'
+      })
+    });
+    assert.strictEqual(blockedCheckout.status, 503, 'Public checkout should be blocked with 503 Service Unavailable during maintenance');
+
+    // 5. Admin can still access admin dashboard endpoints normally
+    const adminCheck = await fetch(`${BASE_URL}/api/admin/stats`, {
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    assert.strictEqual(adminCheck.status, 200, 'Admin retains full dashboard access during maintenance');
+
+    // 6. Admin turns Maintenance Mode OFF
+    const disableRes = await fetch(`${BASE_URL}/api/admin/maintenance-toggle`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ isMaintenanceMode: false })
+    });
+    assert.strictEqual(disableRes.status, 200);
+    const disableData = await disableRes.json();
+    assert.strictEqual(disableData.settings.isMaintenanceMode, false, 'Maintenance Mode should now be OFF');
+
+    // 7. Verify public settings reflect maintenance mode is OFF
+    const finalSettings = await (await fetch(`${BASE_URL}/api/settings`)).json();
+    assert.strictEqual(finalSettings.isMaintenanceMode, false, 'Storefront is now live for all visitors');
+  });
+
+  console.log('\n====================================================');
+  console.log(`📊 Test Results: ${passed} passed, ${failed} failed`);
+  console.log('====================================================');
+
+  if (failed > 0) {
+    process.exit(1);
+  }
 }
+
+runTests().catch(err => {
+  console.error('Test execution fatal error:', err);
+  process.exit(1);
+});

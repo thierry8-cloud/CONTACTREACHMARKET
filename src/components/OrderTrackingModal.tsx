@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Order, OrderStatus } from '../types.ts';
 import { Language, translations } from '../translations.ts';
+import { api } from '../services/api.ts';
 import { buildUssdCode, formatUssdTelUri, autoTriggerUssd } from '../utils/ussd.ts';
 
 interface OrderTrackingModalProps {
@@ -67,12 +68,7 @@ export const OrderTrackingModal: React.FC<OrderTrackingModalProps> = ({
       if (urlToken) queryParams.set('token', urlToken);
 
       const q = queryParams.toString() ? `?${queryParams.toString()}` : '';
-      const res = await fetch(`/api/orders/${encodeURIComponent(searchQuery.trim().toUpperCase())}${q}`);
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Order reference not found');
-      }
-      const data: Order = await res.json();
+      const data = await api.trackOrder(searchQuery.trim().toUpperCase(), phoneQuery.trim());
       setTrackedOrder(data);
     } catch (err: any) {
       setError(err.message || 'Could not find order. Please verify your reference number and phone.');

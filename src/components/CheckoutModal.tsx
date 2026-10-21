@@ -188,18 +188,7 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
         couponCode: appliedDiscount > 0 ? discountCode.trim() : undefined
       };
 
-      const response = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to place order');
-      }
-
-      const orderData: Order = await response.json();
+      const orderData = await api.createOrder(orderPayload);
       setCreatedOrder(orderData);
       onOrderCreated(orderData);
       setStep('payment');
@@ -327,29 +316,19 @@ export const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     setLoading(true);
     try {
-      const res = await fetch('/api/payments/confirm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          orderNumber: orderRef,
-          customerName: customerName.trim(),
-          paymentPhone: customerPhone.trim(),
-          paymentMethod,
-          amountPaid: Number(amountToPay),
-          transactionId: transactionId.trim() || (detectedTxn || `SMS-${Date.now().toString().slice(-6)}`),
-          screenshotUrl: screenshotData || undefined,
-          confirmationMessage: confirmationMessage.trim() || undefined
-        })
+      const data = await api.submitPaymentConfirmation({
+        orderNumber: orderRef,
+        customerName: customerName.trim(),
+        paymentPhone: customerPhone.trim(),
+        paymentMethod,
+        amountPaid: Number(amountToPay),
+        transactionId: transactionId.trim() || (detectedTxn || `SMS-${Date.now().toString().slice(-6)}`),
+        screenshotUrl: screenshotData || undefined,
+        confirmationMessage: confirmationMessage.trim() || undefined
       });
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to submit payment confirmation.');
-      }
-
-      const data = await res.json();
       setProofSubmittedResult(data);
-      if (data.order) {
+      if (data.order && data.order.id) {
         setCreatedOrder(data.order);
       }
       setStep('confirmed');

@@ -377,130 +377,84 @@ function saveToFirestoreAsync(collectionName: string, docId: string, data: any) 
   });
 }
 
-// Background startup sync with Cloud Firestore: ensures Firestore is authoritative
+// Background startup sync with Cloud Firestore: ensures Firestore is authoritative for catalog & settings
 async function syncWithFirestore() {
   if (!firestoreDb) return;
   try {
     // 1. Sync global settings if present in Firestore
-    const settingsDocRef = firestoreDoc(firestoreDb, 'settings', 'global');
-    const settingsSnap = await firestoreGetDoc(settingsDocRef);
-    if (settingsSnap.exists()) {
-      db.settings = { ...db.settings, ...(settingsSnap.data() as AppSettings) };
+    try {
+      const settingsDocRef = firestoreDoc(firestoreDb, 'settings', 'global');
+      const settingsSnap = await firestoreGetDoc(settingsDocRef);
+      if (settingsSnap.exists()) {
+        db.settings = { ...db.settings, ...(settingsSnap.data() as AppSettings) };
+      }
+    } catch (err: any) {
+      console.log('[Firebase] Settings sync notice:', err.message || err);
     }
 
     // 2. Sync categories if populated in Firestore
-    const catCol = firestoreCollection(firestoreDb, 'categories');
-    const catSnap = await firestoreGetDocs(catCol);
-    if (catSnap.size > 0) {
-      const fsCats: Category[] = [];
-      catSnap.forEach(d => fsCats.push({ ...(d.data() as Category), id: d.id }));
-      if (fsCats.length > 0) {
-        const fsCatIds = new Set(fsCats.map(c => c.id));
-        const missingInitial = initialCategories.filter(c => !fsCatIds.has(c.id));
-        db.categories = [...fsCats, ...missingInitial];
+    try {
+      const catCol = firestoreCollection(firestoreDb, 'categories');
+      const catSnap = await firestoreGetDocs(catCol);
+      if (catSnap.size > 0) {
+        const fsCats: Category[] = [];
+        catSnap.forEach(d => fsCats.push({ ...(d.data() as Category), id: d.id }));
+        if (fsCats.length > 0) {
+          const fsCatIds = new Set(fsCats.map(c => c.id));
+          const missingInitial = initialCategories.filter(c => !fsCatIds.has(c.id));
+          db.categories = [...fsCats, ...missingInitial];
+        }
       }
+    } catch (err: any) {
+      console.log('[Firebase] Categories sync notice:', err.message || err);
     }
 
     // 3. Sync live products if present in Firestore
-    const prodCol = firestoreCollection(firestoreDb, 'products');
-    const prodSnap = await firestoreGetDocs(prodCol);
-    if (prodSnap.size > 0) {
-      const fsProds: Product[] = [];
-      prodSnap.forEach(d => fsProds.push({ ...(d.data() as Product), id: d.id }));
-      if (fsProds.length > 0) db.products = fsProds;
+    try {
+      const prodCol = firestoreCollection(firestoreDb, 'products');
+      const prodSnap = await firestoreGetDocs(prodCol);
+      if (prodSnap.size > 0) {
+        const fsProds: Product[] = [];
+        prodSnap.forEach(d => fsProds.push({ ...(d.data() as Product), id: d.id }));
+        if (fsProds.length > 0) db.products = fsProds;
+      }
+    } catch (err: any) {
+      console.log('[Firebase] Products sync notice:', err.message || err);
     }
 
     // 4. Sync shops if present in Firestore
-    const shopCol = firestoreCollection(firestoreDb, 'shops');
-    const shopSnap = await firestoreGetDocs(shopCol);
-    if (shopSnap.size > 0) {
-      const fsShops: VendorShop[] = [];
-      shopSnap.forEach(d => fsShops.push({ ...(d.data() as VendorShop), id: d.id }));
-      if (fsShops.length > 0) db.shops = fsShops;
+    try {
+      const shopCol = firestoreCollection(firestoreDb, 'shops');
+      const shopSnap = await firestoreGetDocs(shopCol);
+      if (shopSnap.size > 0) {
+        const fsShops: VendorShop[] = [];
+        shopSnap.forEach(d => fsShops.push({ ...(d.data() as VendorShop), id: d.id }));
+        if (fsShops.length > 0) db.shops = fsShops;
+      }
+    } catch (err: any) {
+      console.log('[Firebase] Shops sync notice:', err.message || err);
     }
 
     // 5. Sync coupons if present in Firestore
-    const coupCol = firestoreCollection(firestoreDb, 'coupons');
-    const coupSnap = await firestoreGetDocs(coupCol);
-    if (coupSnap.size > 0) {
-      const fsCoups: Coupon[] = [];
-      coupSnap.forEach(d => fsCoups.push({ ...(d.data() as Coupon), id: d.id }));
-      if (fsCoups.length > 0) {
-        const fsCoupIds = new Set(fsCoups.map(c => c.id));
-        const missing = db.coupons.filter(c => !fsCoupIds.has(c.id));
-        db.coupons = [...fsCoups, ...missing];
+    try {
+      const coupCol = firestoreCollection(firestoreDb, 'coupons');
+      const coupSnap = await firestoreGetDocs(coupCol);
+      if (coupSnap.size > 0) {
+        const fsCoups: Coupon[] = [];
+        coupSnap.forEach(d => fsCoups.push({ ...(d.data() as Coupon), id: d.id }));
+        if (fsCoups.length > 0) {
+          const fsCoupIds = new Set(fsCoups.map(c => c.id));
+          const missing = db.coupons.filter(c => !fsCoupIds.has(c.id));
+          db.coupons = [...fsCoups, ...missing];
+        }
       }
+    } catch (err: any) {
+      console.log('[Firebase] Coupons sync notice:', err.message || err);
     }
 
-    // 6. Sync customers if present in Firestore
-    const custCol = firestoreCollection(firestoreDb, 'customers');
-    const custSnap = await firestoreGetDocs(custCol);
-    if (custSnap.size > 0) {
-      const fsCusts: CustomerUser[] = [];
-      custSnap.forEach(d => fsCusts.push({ ...(d.data() as CustomerUser), id: d.id }));
-      if (fsCusts.length > 0) {
-        const fsCustIds = new Set(fsCusts.map(c => c.id));
-        const missing = db.customers.filter(c => !fsCustIds.has(c.id));
-        db.customers = [...fsCusts, ...missing];
-      }
-    }
-
-    // 7. Sync orders if present in Firestore (prevent data loss across container sleep/disk wipe)
-    const orderCol = firestoreCollection(firestoreDb, 'orders');
-    const orderSnap = await firestoreGetDocs(orderCol);
-    if (orderSnap.size > 0) {
-      const fsOrders: Order[] = [];
-      orderSnap.forEach(d => fsOrders.push({ ...(d.data() as Order), id: d.id }));
-      if (fsOrders.length > 0) {
-        const existingOrderIds = new Set(db.orders.map(o => o.id));
-        const existingOrderNums = new Set(db.orders.map(o => o.orderNumber.toUpperCase()));
-        const newOrders = fsOrders.filter(o => !existingOrderIds.has(o.id) && !existingOrderNums.has(o.orderNumber?.toUpperCase()));
-        db.orders = [...db.orders, ...newOrders];
-      }
-    }
-
-    // 8. Sync payment confirmations from Firestore
-    const pmCol = firestoreCollection(firestoreDb, 'paymentConfirmations');
-    const pmSnap = await firestoreGetDocs(pmCol);
-    if (pmSnap.size > 0) {
-      const fsPms: PaymentConfirmation[] = [];
-      pmSnap.forEach(d => fsPms.push({ ...(d.data() as PaymentConfirmation), id: d.id }));
-      if (fsPms.length > 0) {
-        const existingPmIds = new Set(db.paymentConfirmations.map(c => c.id));
-        const newPms = fsPms.filter(c => !existingPmIds.has(c.id));
-        db.paymentConfirmations = [...db.paymentConfirmations, ...newPms];
-      }
-    }
-
-    // 9. Sync supplier applications from Firestore
-    const suppCol = firestoreCollection(firestoreDb, 'supplierApplications');
-    const suppSnap = await firestoreGetDocs(suppCol);
-    if (suppSnap.size > 0) {
-      const fsApps: SupplierApplication[] = [];
-      suppSnap.forEach(d => fsApps.push({ ...(d.data() as SupplierApplication), id: d.id }));
-      if (fsApps.length > 0) {
-        const existingAppIds = new Set(db.supplierApplications.map(a => a.id));
-        const newApps = fsApps.filter(a => !existingAppIds.has(a.id));
-        db.supplierApplications = [...db.supplierApplications, ...newApps];
-      }
-    }
-
-    // 10. Sync supplier payouts from Firestore
-    const payoutCol = firestoreCollection(firestoreDb, 'supplierPayouts');
-    const payoutSnap = await firestoreGetDocs(payoutCol);
-    if (payoutSnap.size > 0) {
-      const fsPayouts: SupplierPayoutRecord[] = [];
-      payoutSnap.forEach(d => fsPayouts.push({ ...(d.data() as SupplierPayoutRecord), id: d.id }));
-      if (fsPayouts.length > 0) {
-        const existingPayoutIds = new Set(db.supplierPayouts.map(p => p.id));
-        const newPayouts = fsPayouts.filter(p => !existingPayoutIds.has(p.id));
-        db.supplierPayouts = [...db.supplierPayouts, ...newPayouts];
-      }
-    }
-
-    console.log('[Firebase] Cloud Firestore synchronization verified successfully.');
-  } catch (err) {
-    console.warn('[Firebase] Firestore synchronization notice:', err);
+    console.log('[Firebase] Cloud Firestore catalog & settings synchronization completed.');
+  } catch (err: any) {
+    console.log('[Firebase] Startup synchronization notice:', err.message || err);
   }
 }
 

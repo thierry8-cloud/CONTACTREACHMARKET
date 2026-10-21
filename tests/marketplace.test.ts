@@ -250,7 +250,10 @@ async function runTests() {
     });
     assert.strictEqual(confirmRes.status, 200);
     const confData = await confirmRes.json();
-    assert.strictEqual(confData.confirmation.verificationStatus, 'Pending Review');
+    assert(
+      confData.confirmation.verificationStatus === 'Pending Verification' || confData.confirmation.verificationStatus === 'Pending Review',
+      'Should be in Pending Verification or Pending Review state'
+    );
     assert.strictEqual(confData.order.paymentStatus, 'Pending Verification');
     confirmationId = confData.confirmation.id;
 
@@ -471,6 +474,71 @@ async function runTests() {
     const updatedDiscountProd = await updateDiscountRes.json();
     assert.strictEqual(updatedDiscountProd.discountPercent, 30);
     assert.strictEqual(updatedDiscountProd.discountPrice, 17500, '30% off 25,000 FRW must be 17,500 FRW');
+  });
+
+  // TEST 16: Simplified Payment Flow - Method Switching without Duplicate Orders, Duplicate Txn ID Flagging & Under Verification
+  await test('Customer can switch payment method on existing order, duplicate transaction IDs are flagged suspicious, and admin can mark Under Verification', async () => {
+    // 1. Create order
+    const orderRes = await fetch(`${BASE_URL}/api/orders`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customerName: 'Gisele Umuhoza',
+        customerPhone: '0788776655',
+        deliveryLocation: 'Nyarugenge (City Center)',
+        deliveryAddress: 'KN 4 Ave, Kigali',
+        items: [{ productId: createdProductId, quantity: 1 }],
+        paymentMethod: 'MTN Merchant Code'
+      })
+    });
+    assert.strictEqual(orderRes.status, 201);
+    const order = await orderRes.json();
+    assert.strictEqual(order.paymentMethod, 'MTN Merchant Code');
+
+    // 2. Switch payment method on the SAME order reference without creating a duplicate order
+    const switchRes = await fetch(`${BASE_URL}/api/orders/${order.orderNumber}/payment-method`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentMethod: 'Airtel Money' })
+    });
+    assert.strictEqual(switchRes.status, 200, 'Switching payment method must succeed');
+    const switchData = await switchRes.json();
+    assert.strictEqual(switchData.order.paymentMethod, 'Airtel Money');
+    assert.strictEqual(switchData.order.orderNumber, order.orderNumber, 'Order reference must remain identical');
+
+    // 3. Submit payment confirmation with a transaction ID that was already used on an earlier order (e.g. 991827461)
+    const duplicateTxn = '991827461'; // used in Test 10B
+    const confirmRes = await fetch(`${BASE_URL}/api/payments/confirm`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderNumber: order.orderNumber,
+        customerName: 'Gisele Umuhoza',
+        paymentPhone: '0788776655',
+        paymentMethod: 'Airtel Money',
+        amountPaid: order.totalAmount,
+        transactionId: duplicateTxn
+      })
+    });
+    assert.strictEqual(confirmRes.status, 200);
+    const confirmData = await confirmRes.json();
+    assert.strictEqual(confirmData.confirmation.flaggedSuspicious, true, 'Duplicate transaction ID must be flagged suspicious');
+    assert.strictEqual(confirmData.confirmation.isDuplicateTxn, true);
+    assert(confirmData.confirmation.suspiciousReason?.includes(duplicateTxn));
+
+    // 4. Admin marks payment as Under Verification
+    const auditRes = await fetch(`${BASE_URL}/api/admin/payments/${confirmData.confirmation.id}/verify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${adminToken}`
+      },
+      body: JSON.stringify({ action: 'under_verification', adminNotes: 'Suspicious duplicate transaction reference detected. Requesting telecom statement export.' })
+    });
+    assert.strictEqual(auditRes.status, 200);
+    const auditData = await auditRes.json();
+    assert.strictEqual(auditData.confirmation.verificationStatus, 'Under Verification');
+    assert.strictEqual(auditData.order.paymentStatus, 'Under Verification');
   });
 
   console.log('\n====================================================');

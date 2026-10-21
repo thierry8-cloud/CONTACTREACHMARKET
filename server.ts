@@ -935,6 +935,49 @@ app.get('/api/orders/:orderNumber/invoice', (req: Request, res: Response) => {
   });
 });
 
+// Switch / Update Payment Method on Existing Order (prevents creating duplicate orders)
+app.patch('/api/orders/:orderNumber/payment-method', (req: Request, res: Response) => {
+  const orderNumber = req.params.orderNumber.trim().toUpperCase();
+  const { paymentMethod } = req.body;
+  if (!paymentMethod) {
+    return res.status(400).json({ error: 'paymentMethod is required.' });
+  }
+
+  const order = db.orders.find(o => o.orderNumber.toUpperCase() === orderNumber);
+  if (!order) {
+    return res.status(404).json({ error: `Order #${orderNumber} not found.` });
+  }
+
+  const oldMethod = order.paymentMethod;
+  order.paymentMethod = paymentMethod;
+
+  if (paymentMethod === 'MTN Merchant Code') {
+    order.receiverName = 'ContactReach Market';
+    order.receiverDetails = db.settings.merchantCode || '078002';
+  } else if (paymentMethod === 'Airtel Money') {
+    order.receiverName = db.settings.receiverName || 'Ruth';
+    order.receiverDetails = db.settings.paymentNumber || '078002260';
+  } else {
+    order.receiverName = db.settings.receiverName || 'Ruth';
+    order.receiverDetails = db.settings.paymentNumber || '078002260';
+  }
+
+  order.statusHistory.push({
+    status: order.status,
+    paymentStatus: order.paymentStatus,
+    timestamp: new Date().toISOString(),
+    note: `Customer updated payment channel from "${oldMethod}" to "${paymentMethod}".`
+  });
+
+  saveDbToDisk();
+  saveToFirestoreAsync('orders', order.id, order);
+
+  res.json({
+    message: 'Payment method updated successfully.',
+    order
+  });
+});
+
 // Payment Confirmation Submission
 app.post('/api/payments/confirm', (req: Request, res: Response) => {
   const { orderNumber, customerName, paymentPhone, paymentMethod, amountPaid, transactionId, screenshotUrl, confirmationMessage } = req.body;
@@ -970,20 +1013,56 @@ app.post('/api/payments/confirm', (req: Request, res: Response) => {
     return res.status(404).json({ error: `Order reference ${orderNumber} not found.` });
   }
 
-  const confirmation: PaymentConfirmation = {
-    id: `conf-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
-    orderId: order.id,
-    orderNumber: order.orderNumber,
-    customerName: customerName || order.customerName,
-    paymentPhone: paymentPhone.trim(),
-    paymentMethod: paymentMethod || order.paymentMethod,
-    amountPaid: Number(amountPaid),
-    transactionId: finalTxnId || `TXN-${Date.now().toString().slice(-6)}`,
-    screenshotUrl: screenshotUrl || undefined,
-    confirmationMessage: cleanMessage || undefined,
-    submittedAt: new Date().toISOString(),
-    verificationStatus: 'Pending Review'
-  };
+  // Duplicate Transaction ID Detection: Check if transactionId exists on ANY other order
+  const duplicateOnOther = db.paymentConfirmations.filter(
+    c => finalTxnId && c.transactionId && c.transactionId.trim().toUpperCase() === finalTxnId.toUpperCase() &&
+         c.orderNumber.trim().toUpperCase() !== order.orderNumber.trim().toUpperCase()
+  );
+  const isDuplicateTxn = duplicateOnOther.length > 0;
+  const duplicateOrderNumbers = isDuplicateTxn ? duplicateOnOther.map(c => c.orderNumber) : undefined;
+  const flaggedSuspicious = isDuplicateTxn;
+  const suspiciousReason = isDuplicateTxn
+    ? `Duplicate Transaction ID: "${finalTxnId}" was already submitted for Order #${duplicateOrderNumbers?.join(', #')}`
+    : undefined;
+
+  // Check if confirmation already exists for this order to prevent duplicates upon resubmission
+  let confirmation = db.paymentConfirmations.find(c => c.orderNumber.toUpperCase() === order.orderNumber.toUpperCase());
+
+  if (confirmation) {
+    confirmation.customerName = customerName || confirmation.customerName || order.customerName;
+    confirmation.paymentPhone = paymentPhone.trim();
+    confirmation.paymentMethod = paymentMethod || confirmation.paymentMethod || order.paymentMethod;
+    confirmation.amountPaid = Number(amountPaid);
+    confirmation.transactionId = finalTxnId || confirmation.transactionId;
+    if (screenshotUrl) confirmation.screenshotUrl = screenshotUrl;
+    if (cleanMessage) confirmation.confirmationMessage = cleanMessage;
+    confirmation.submittedAt = new Date().toISOString();
+    confirmation.verificationStatus = 'Pending Verification';
+    confirmation.isDuplicateTxn = isDuplicateTxn;
+    confirmation.duplicateOrderNumbers = duplicateOrderNumbers;
+    confirmation.flaggedSuspicious = flaggedSuspicious;
+    confirmation.suspiciousReason = suspiciousReason;
+  } else {
+    confirmation = {
+      id: `conf-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+      orderId: order.id,
+      orderNumber: order.orderNumber,
+      customerName: customerName || order.customerName,
+      paymentPhone: paymentPhone.trim(),
+      paymentMethod: paymentMethod || order.paymentMethod,
+      amountPaid: Number(amountPaid),
+      transactionId: finalTxnId || `TXN-${Date.now().toString().slice(-6)}`,
+      screenshotUrl: screenshotUrl || undefined,
+      confirmationMessage: cleanMessage || undefined,
+      submittedAt: new Date().toISOString(),
+      verificationStatus: 'Pending Verification',
+      isDuplicateTxn,
+      duplicateOrderNumbers,
+      flaggedSuspicious,
+      suspiciousReason
+    };
+    db.paymentConfirmations.unshift(confirmation);
+  }
 
   order.paymentConfirmation = confirmation;
   order.paymentStatus = 'Pending Verification';
@@ -991,16 +1070,17 @@ app.post('/api/payments/confirm', (req: Request, res: Response) => {
     status: order.status,
     paymentStatus: 'Pending Verification',
     timestamp: new Date().toISOString(),
-    note: `Payment confirmation submitted. Txn ID: ${confirmation.transactionId}, Phone: ${paymentPhone}${cleanMessage ? ' (SMS pasted)' : ''}${screenshotUrl ? ' (Screenshot attached)' : ''}. Pending verification.`
+    note: `Payment confirmation submitted. Txn ID: ${confirmation.transactionId}, Phone: ${paymentPhone}${cleanMessage ? ' (SMS pasted)' : ''}${screenshotUrl ? ' (Screenshot attached)' : ''}${isDuplicateTxn ? ' [WARNING: Duplicate Txn ID detected]' : ''}. Pending verification.`
   });
 
-  db.paymentConfirmations.unshift(confirmation);
   saveDbToDisk();
   saveToFirestoreAsync('paymentConfirmations', confirmation.id, confirmation);
   saveToFirestoreAsync('orders', order.id, order);
 
   res.json({
-    message: 'Payment confirmation submitted successfully. Our team will verify and approve promptly.',
+    message: isDuplicateTxn
+      ? 'Payment submitted. Note: this transaction ID matches a previously submitted order and is flagged for manual audit.'
+      : 'Payment confirmation submitted successfully. Our team will verify and approve promptly.',
     confirmation,
     order
   });
@@ -2152,10 +2232,12 @@ app.post('/api/admin/payments/:id/verify', requireAdminAuth, requireRole(['owner
   const order = db.orders.find(o => o.id === confirmation.orderId || o.orderNumber === confirmation.orderNumber);
 
   if (action === 'approve') {
-    confirmation.verificationStatus = 'Approved';
+    confirmation.verificationStatus = 'Verified/Paid';
     confirmation.verifiedAt = new Date().toISOString();
     confirmation.verifiedBy = admin.name;
     confirmation.adminNotes = adminNotes || 'Payment verified with MTN/Airtel statement records.';
+    confirmation.customerNotified = true;
+    confirmation.notificationMessage = `Payment of ${confirmation.amountPaid.toLocaleString()} FRW for Order #${confirmation.orderNumber} has been verified and confirmed! ContactReach Market is preparing your delivery.`;
 
     if (order) {
       order.paymentStatus = 'Paid';
@@ -2192,6 +2274,7 @@ app.post('/api/admin/payments/:id/verify', requireAdminAuth, requireRole(['owner
         note: `Payment verified & approved by ${admin.name}: ${confirmation.amountPaid.toLocaleString()} FRW (${confirmation.transactionId}).`,
         updatedBy: admin.name
       });
+      saveToFirestoreAsync('orders', order.id, order);
     }
 
     logAudit(admin, 'PAYMENT_APPROVED', `Approved payment of ${confirmation.amountPaid} FRW for Order #${confirmation.orderNumber} (Txn: ${confirmation.transactionId})`, 'payment', confirmation.id);
@@ -2200,26 +2283,50 @@ app.post('/api/admin/payments/:id/verify', requireAdminAuth, requireRole(['owner
     confirmation.verifiedAt = new Date().toISOString();
     confirmation.verifiedBy = admin.name;
     confirmation.adminNotes = adminNotes || 'Transaction ID not verified on mobile money records.';
+    confirmation.customerNotified = true;
+    confirmation.notificationMessage = `Payment for Order #${confirmation.orderNumber} could not be verified against telecom records (${adminNotes || 'Unverified transaction ID'}). Please contact support or resubmit proof.`;
 
     if (order) {
-      order.paymentStatus = 'Failed';
+      order.paymentStatus = 'Payment Rejected';
       order.paymentConfirmation = confirmation;
       order.statusHistory.push({
         status: order.status,
-        paymentStatus: 'Failed',
+        paymentStatus: 'Payment Rejected',
         timestamp: new Date().toISOString(),
         note: `Payment verification rejected by ${admin.name}: ${adminNotes || 'Unverified transaction ID'}.`,
         updatedBy: admin.name
       });
+      saveToFirestoreAsync('orders', order.id, order);
     }
 
     logAudit(admin, 'PAYMENT_REJECTED', `Rejected payment for Order #${confirmation.orderNumber} (${confirmation.transactionId}): ${adminNotes}`, 'payment', confirmation.id);
+  } else if (action === 'under_verification') {
+    confirmation.verificationStatus = 'Under Verification';
+    confirmation.verifiedAt = new Date().toISOString();
+    confirmation.verifiedBy = admin.name;
+    confirmation.adminNotes = adminNotes || 'Under manual verification with telecom statements.';
+
+    if (order) {
+      order.paymentStatus = 'Under Verification';
+      order.paymentConfirmation = confirmation;
+      order.statusHistory.push({
+        status: order.status,
+        paymentStatus: 'Under Verification',
+        timestamp: new Date().toISOString(),
+        note: `Payment moved to Under Verification by ${admin.name}: ${adminNotes || 'Auditing telecom records'}.`,
+        updatedBy: admin.name
+      });
+      saveToFirestoreAsync('orders', order.id, order);
+    }
+
+    logAudit(admin, 'PAYMENT_AUDITING', `Payment marked Under Verification for Order #${confirmation.orderNumber}`, 'payment', confirmation.id);
   } else {
-    return res.status(400).json({ error: 'Invalid action. Must be "approve" or "reject".' });
+    return res.status(400).json({ error: 'Invalid action. Must be "approve", "reject", or "under_verification".' });
   }
 
   saveDbToDisk();
-  res.json({ message: `Payment ${action}d successfully.`, confirmation, order });
+  saveToFirestoreAsync('paymentConfirmations', confirmation.id, confirmation);
+  res.json({ message: `Payment status updated to ${confirmation.verificationStatus} successfully.`, confirmation, order });
 });
 
 app.post('/api/admin/payment-methods', requireAdminAuth, requireRole(['owner', 'administrator']), (req: Request, res: Response) => {

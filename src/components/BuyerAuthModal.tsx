@@ -39,12 +39,14 @@ export const BuyerAuthModal: React.FC<BuyerAuthModalProps> = ({
         );
       }
 
+      const idToken = await fbUser.getIdToken();
       const res = await api.buyerGoogleLogin({
         email: fbUser.email,
         displayName: fbUser.displayName,
         uid: fbUser.uid,
         photoURL: fbUser.photoURL,
-        phoneNumber: fbUser.phoneNumber
+        phoneNumber: fbUser.phoneNumber,
+        idToken
       });
 
       onSuccess(res.user);
